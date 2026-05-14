@@ -161,6 +161,24 @@ function FacilityCard({ f, onDetail }) {
             ? <span className="free">무료</span>
             : (f.price_label||f.price)}
         </span>
+        {/* 거리 표시 (GPS 활성 시) */}
+        {f.distanceKm !== undefined && f.distanceKm !== Infinity && (
+          <span style={{
+            display:'inline-flex', alignItems:'center', gap:3,
+            fontSize:12, fontWeight:700,
+            color: f.distanceKm < 1 ? 'var(--badge-business)'
+                 : f.distanceKm < 3 ? 'var(--orbit-rust)'
+                 : 'var(--ink-slate)',
+            background: f.distanceKm < 1 ? 'var(--badge-business-bg)'
+                      : f.distanceKm < 3 ? 'var(--badge-instructor-bg)'
+                      : 'var(--canvas)',
+            borderRadius:999, padding:'3px 8px',
+          }}>
+            <Icon name="map-pin" size={11} stroke={2.5}
+              color={f.distanceKm < 1 ? 'var(--badge-business)' : f.distanceKm < 3 ? 'var(--orbit-rust)' : 'var(--ink-slate)'}/>
+            {window.GeoUtils?.formatDistance(f.distanceKm)}
+          </span>
+        )}
         <span className="seat">
           {seatsOpen
             ? <span className="open">{seatsLabel}</span>
@@ -178,6 +196,7 @@ window.FacilityCard = FacilityCard;
    ============================================================ */
 function Neighborhoods({ dense, searchFilters, onDetail }) {
   const DISTRICTS = [
+    { name:'내 근처', count:null, gps:true },
     { name:'서대문구', count:12 }, { name:'마포구', count:9 },
     { name:'강남구', count:18 }, { name:'송파구', count:14 },
     { name:'관악구', count:8 },  { name:'동작구', count:7 },
@@ -185,37 +204,55 @@ function Neighborhoods({ dense, searchFilters, onDetail }) {
     { name:'+ 17개 자치구', count:null },
   ];
 
-  const [active, setActive] = React.useState('서대문구');
+  const userLocation = searchFilters?.userLocation;
+  const [active, setActive] = React.useState(userLocation ? '내 근처' : '서대문구');
   const [facilities, setFacilities] = React.useState(window.SAMPLE_FACILITIES || []);
   const [loading, setLoading] = React.useState(false);
+  const [gpsRadius, setGpsRadius] = React.useState(null); // 자동 확대 반경
 
-  // Apply search filters from hero
+  // userLocation 변경 시 '내 근처' 탭 자동 선택
+  React.useEffect(() => {
+    if (userLocation) setActive('내 근처');
+  }, [userLocation]);
+
+  // 거리 계산 + 필터 + 정렬
   const filtered = React.useMemo(() => {
-    let list = facilities;
-    if (searchFilters?.dtype) {
-      list = list.filter(f => f.disability_types?.includes(searchFilters.dtype));
-    }
-    if (searchFilters?.sport) {
-      list = list.filter(f => f.programs?.includes(searchFilters.sport));
-    }
+    let list = [...facilities];
+
+    // 기본 필터
+    if (searchFilters?.dtype) list = list.filter(f => f.disability_types?.includes(searchFilters.dtype));
+    if (searchFilters?.sport) list = list.filter(f => f.programs?.includes(searchFilters.sport));
     if (searchFilters?.query) {
       const q = searchFilters.query.toLowerCase();
-      list = list.filter(f =>
-        f.name.toLowerCase().includes(q) ||
-        f.programs?.some(p => p.toLowerCase().includes(q))
-      );
+      list = list.filter(f => f.name.toLowerCase().includes(q) || f.programs?.some(p=>p.toLowerCase().includes(q)));
     }
-    if (searchFilters?.weekend) {
-      list = list.filter(f => f.has_weekend);
+    if (searchFilters?.weekend) list = list.filter(f => f.has_weekend);
+
+    // GPS 기반 '내 근처' 탭: 거리 계산 + 자동 확대
+    if (active === '내 근처' && userLocation?.lat && window.GeoUtils) {
+      const { results, radius } = window.GeoUtils.getResultsWithAutoExpand(list, userLocation.lat, userLocation.lng);
+      setGpsRadius(radius);
+      return results; // distanceKm 필드 포함
+    }
+
+    // 거리 정보 추가 (GPS 있을 때 다른 탭도)
+    if (userLocation?.lat && window.GeoUtils) {
+      list = list.map(f => ({
+        ...f,
+        distanceKm: (f.lat && f.lng)
+          ? window.GeoUtils.haversineKm(userLocation.lat, userLocation.lng, f.lat, f.lng)
+          : undefined,
+      }));
     }
     return list;
-  }, [facilities, searchFilters]);
+  }, [facilities, searchFilters, active, userLocation]);
 
   React.useEffect(() => {
     async function load() {
       if (window.IeumAPI) {
         setLoading(true);
-        const { data, error } = await window.IeumAPI.fetchFacilities({ district: active });
+        const district = (active === '내 근처' || active.startsWith('+')) ? undefined : active;
+        const { data, error } = await window.IeumAPI.fetchFacilities({ district });
         if (data && !error) setFacilities(data);
         setLoading(false);
       }
@@ -223,7 +260,7 @@ function Neighborhoods({ dense, searchFilters, onDetail }) {
     load();
   }, [active]);
 
-  const districtFiltered = active.startsWith('+')
+  const districtFiltered = (active === '내 근처' || active.startsWith('+'))
     ? filtered
     : filtered.filter(f => (f.district||f.region||'').includes(active));
 
@@ -235,11 +272,14 @@ function Neighborhoods({ dense, searchFilters, onDetail }) {
           <span className="en">/ Today, in your neighborhood</span>
         </span>
         <h2 style={{ marginTop:18, maxWidth:700 }}>
-          오늘 우리 동네에 새로 열린 프로그램.
+          {active === '내 근처' && userLocation
+            ? <>{userLocation.displayLabel}의 특수체육 시설</>
+            : '오늘 우리 동네에 새로 열린 프로그램.'}
         </h2>
         <p style={{ marginTop:14, fontSize:17, color:'var(--ink-charcoal)', maxWidth:580, lineHeight:1.55 }}>
-          시·군·구 단위로 가까운 시설을 먼저 보여드려요. 결과가 적으면 자동으로
-          반경을 넓혀 검색합니다.
+          {active === '내 근처' && gpsRadius
+            ? `GPS 기준 반경 ${gpsRadius}km 내 시설을 거리순으로 보여드립니다. 결과가 적으면 자동으로 반경을 넓힙니다.`
+            : '시·군·구 단위로 가까운 시설을 먼저 보여드려요. 결과가 적으면 자동으로 반경을 넓혀 검색합니다.'}
         </p>
 
         {searchFilters && (searchFilters.dtype || searchFilters.sport || searchFilters.query) && (
@@ -266,9 +306,20 @@ function Neighborhoods({ dense, searchFilters, onDetail }) {
               onClick={() => setActive(r.name)}
               role="tab"
               aria-selected={r.name===active}
-              type="button">
+              type="button"
+              style={r.gps ? {
+                display:'inline-flex', alignItems:'center', gap:5,
+                background: r.name===active ? 'var(--ink)' : userLocation ? 'var(--badge-business-bg)' : undefined,
+                color: r.name===active ? '#fff' : userLocation ? 'var(--badge-business)' : undefined,
+                borderColor: userLocation ? 'var(--badge-business)' : undefined,
+              } : undefined}>
+              {r.gps && <Icon name="map-pin" size={12} stroke={2.5}
+                color={r.name===active ? '#fff' : userLocation ? 'var(--badge-business)' : 'var(--ink-slate)'}/>}
               {r.name}
               {r.count!==null && <span className="count">{r.count}</span>}
+              {r.gps && !userLocation && (
+                <span style={{ fontSize:10, opacity:0.6, fontWeight:500 }}>GPS 필요</span>
+              )}
             </button>
           ))}
         </div>

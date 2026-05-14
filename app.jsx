@@ -24,6 +24,9 @@ function App() {
   const [user, setUser] = useState(null);
   const [authModal, setAuthModal] = useState(null); // null | 'login' | 'signup'
 
+  // GPS 위치 상태 (앱 전역)
+  const [userLocation, setUserLocation] = useState(null);
+
   // Search filters (from hero)
   const [searchFilters, setSearchFilters] = useState(null);
   const [totalSearchCount, setTotalSearchCount] = useState(0);
@@ -51,21 +54,28 @@ function App() {
     }
   }, []);
 
+  // GPS 위치 감지 핸들러 (Hero에서 호출)
+  const handleLocationDetected = useCallback((loc) => {
+    setUserLocation(loc);
+  }, []);
+
   // Search handler
   const handleSearch = useCallback((filters) => {
-    setSearchFilters(filters);
+    // userLocation은 filters.userLocation 또는 앱 상태에서 병합
+    const merged = { ...filters, userLocation: filters.userLocation || userLocation };
+    setSearchFilters(merged);
     // Count results
     const all = window.SAMPLE_FACILITIES || [];
     let list = all;
-    if (filters.dtype) list = list.filter(f => f.disability_types?.includes(filters.dtype));
-    if (filters.sport) list = list.filter(f => f.programs?.includes(filters.sport));
-    if (filters.query) {
-      const q = filters.query.toLowerCase();
+    if (merged.dtype) list = list.filter(f => f.disability_types?.includes(merged.dtype));
+    if (merged.sport) list = list.filter(f => f.programs?.includes(merged.sport));
+    if (merged.query) {
+      const q = merged.query.toLowerCase();
       list = list.filter(f => f.name.toLowerCase().includes(q));
     }
-    if (filters.weekend) list = list.filter(f => f.has_weekend);
+    if (merged.weekend) list = list.filter(f => f.has_weekend);
     setTotalSearchCount(list.length);
-  }, []);
+  }, [userLocation]);
 
   // Type filter from disability section
   const handleTypeSelect = useCallback((dtype) => {
@@ -89,7 +99,12 @@ function App() {
 
       <SearchResultsBar filters={searchFilters} totalCount={totalSearchCount}/>
 
-      <Hero variant={t.heroVariant} onSearch={handleSearch}/>
+      <Hero
+        variant={t.heroVariant}
+        onSearch={handleSearch}
+        userLocation={userLocation}
+        onLocationDetected={handleLocationDetected}
+      />
 
       <ImpactStrip showTicker={t.showLiveTicker}/>
 
@@ -103,7 +118,7 @@ function App() {
 
       <TrustSystem/>
 
-      <MapPreview searchFilters={searchFilters}/>
+      <MapPreview searchFilters={searchFilters} userLocation={userLocation}/>
 
       <ProviderCTA
         onRegister={(role) => {

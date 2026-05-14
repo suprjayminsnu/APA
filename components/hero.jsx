@@ -21,9 +21,87 @@ const SPORTS = [
 const QUICK_CHIPS = ['수영', '요가', '휠체어 농구', '볼링', '발달장애 아동', '주말 프로그램'];
 
 /* ============================================================
-   Constellation — sports portraits orbiting "you"
+   GPS 위치 버튼 — 클릭 시 실제 좌표 → 역지오코딩
    ============================================================ */
-function Constellation() {
+function GpsButton({ onLocationDetected }) {
+  const [status, setStatus] = React.useState('idle'); // idle | loading | done | error
+  const [errorMsg, setErrorMsg] = React.useState('');
+
+  async function handleClick() {
+    if (!window.GeoUtils) return;
+    setStatus('loading');
+    setErrorMsg('');
+    try {
+      const pos = await window.GeoUtils.getCurrentPosition();
+      const geo = await window.GeoUtils.reverseGeocode(pos.lat, pos.lng);
+      setStatus('done');
+      onLocationDetected({ ...pos, ...geo });
+    } catch (err) {
+      setStatus('error');
+      setErrorMsg(err.message);
+      setTimeout(() => setStatus('idle'), 4000);
+    }
+  }
+
+  const colors = {
+    idle:    { bg:'var(--canvas)', color:'var(--ink-slate)', border:'var(--border-soft)' },
+    loading: { bg:'#EEF3FF',       color:'#3860BE',          border:'#3860BE' },
+    done:    { bg:'#E8F5E9',       color:'#1B7A4B',          border:'#1B7A4B' },
+    error:   { bg:'#FEE8E8',       color:'#C62828',          border:'#C62828' },
+  };
+  const c = colors[status];
+
+  return (
+    <div style={{ position:'relative' }}>
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={status === 'loading'}
+        title="현재 위치 자동 감지"
+        aria-label="GPS로 현재 위치 감지"
+        style={{
+          display:'inline-flex', alignItems:'center', gap:6,
+          padding:'8px 14px', borderRadius:999,
+          border:`1.5px solid ${c.border}`,
+          background:c.bg, color:c.color,
+          cursor: status==='loading' ? 'wait' : 'pointer',
+          fontSize:12.5, fontWeight:700, fontFamily:'inherit',
+          transition:'all 200ms', whiteSpace:'nowrap',
+        }}>
+        {status === 'loading' ? (
+          <span style={{ animation:'spin 0.8s linear infinite', display:'inline-block' }}>⊙</span>
+        ) : status === 'done' ? (
+          <Icon name="check" size={13} stroke={3} color={c.color}/>
+        ) : status === 'error' ? (
+          <Icon name="alert-circle" size={13} color={c.color}/>
+        ) : (
+          <Icon name="map-pin" size={13} stroke={2.2} color={c.color}/>
+        )}
+        {status === 'loading' ? '감지 중...'
+         : status === 'done'    ? '위치 감지 완료'
+         : status === 'error'   ? '다시 시도'
+         : '현재 위치 사용'}
+      </button>
+      {status === 'error' && errorMsg && (
+        <div style={{
+          position:'absolute', top:'calc(100% + 8px)', left:0,
+          background:'#C62828', color:'#fff',
+          padding:'8px 14px', borderRadius:10,
+          fontSize:12, fontWeight:500, whiteSpace:'normal',
+          maxWidth:280, zIndex:50, lineHeight:1.5,
+          boxShadow:'0 8px 20px rgba(0,0,0,0.2)',
+        }}>
+          {errorMsg}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
+   Constellation
+   ============================================================ */
+function Constellation({ userLocation }) {
   const planets = [
     { key:'swim',   sport:'수영',       meta:'11개 시설', cx:18, cy:22, size:130,
       fill:'radial-gradient(circle at 30% 25%, #BFE2F2 0%, #5DA8CF 65%, #1B5F88 100%)', color:'#fff' },
@@ -31,7 +109,7 @@ function Constellation() {
       fill:'radial-gradient(circle at 30% 25%, #F4D9D2 0%, #D38A86 60%, #8B3A3A 100%)', color:'#fff' },
     { key:'bowl',   sport:'볼링',       meta:'6개 시설',  cx:91, cy:58, size:96,
       fill:'radial-gradient(circle at 30% 25%, #FAE7C7 0%, #E8B560 60%, #A56B14 100%)', color:'#fff' },
-    { key:'wbball', sport:'휠체어\n농구', meta:'8개 시설',  cx:70, cy:88, size:120,
+    { key:'wbball', sport:'휠체어\n농구', meta:'8개 시설', cx:70, cy:88, size:120,
       fill:'radial-gradient(circle at 30% 25%, #FCC9A1 0%, #F37338 55%, #9A3A0A 100%)', color:'#fff' },
     { key:'dance',  sport:'댄스',       meta:'17개 시설', cx:22, cy:82, size:100,
       fill:'radial-gradient(circle at 30% 25%, #E7DBF2 0%, #9A82C7 60%, #4F3A8E 100%)', color:'#fff' },
@@ -62,21 +140,17 @@ function Constellation() {
       <div className="center-portrait">
         <span className="you-eyebrow">You · 당신</span>
         <span className="you-name">우리 동네</span>
-        <span className="you-sub">서울 서대문구</span>
+        <span className="you-sub">
+          {userLocation ? userLocation.displayLabel : '서울 서대문구'}
+        </span>
       </div>
 
       {planets.map(p => (
         <div key={p.key} className="planet"
-          style={{
-            top:`${p.cy}%`, left:`${p.cx}%`,
-            width:p.size, height:p.size,
-            background:p.fill, color:p.color,
-            transform:'translate(-50%, -50%)',
-          }}>
+          style={{ top:`${p.cy}%`, left:`${p.cx}%`, width:p.size, height:p.size,
+            background:p.fill, color:p.color, transform:'translate(-50%, -50%)' }}>
           <div className="planet-inner">
-            <div className="sport" style={{ fontSize:p.size>110?18:15, whiteSpace:'pre-line' }}>
-              {p.sport}
-            </div>
+            <div className="sport" style={{ fontSize:p.size>110?18:15, whiteSpace:'pre-line' }}>{p.sport}</div>
             <div className="meta">{p.meta}</div>
           </div>
         </div>
@@ -106,31 +180,44 @@ function Constellation() {
 /* ============================================================
    Hero
    ============================================================ */
-function Hero({ variant, onSearch }) {
-  const [region, setRegion]   = React.useState('서울특별시');
+function Hero({ variant, onSearch, userLocation, onLocationDetected }) {
+  const [region, setRegion]   = React.useState('');
   const [dtype,  setDtype]    = React.useState('');
   const [sport,  setSport]    = React.useState('');
-  const [query,  setQuery]    = React.useState('');
   const [regionOpen, setRegionOpen] = React.useState(false);
   const [dtypeOpen,  setDtypeOpen]  = React.useState(false);
   const [sportOpen,  setSportOpen]  = React.useState(false);
 
+  // userLocation이 바뀌면 region 라벨 동기화
+  React.useEffect(() => {
+    if (userLocation?.short) setRegion(userLocation.short);
+  }, [userLocation]);
+
+  function closeAllDrops() { setRegionOpen(false); setDtypeOpen(false); setSportOpen(false); }
+
   function handleSearch(e) {
     e?.preventDefault();
-    if (onSearch) onSearch({ region, dtype, sport, query });
+    if (onSearch) onSearch({ region, dtype, sport, userLocation });
     document.getElementById('regions')?.scrollIntoView({ behavior: 'smooth' });
   }
 
   function handleChip(chip) {
+    let nextSport = sport, nextDtype = dtype, extra = {};
     if (SPORTS.includes(chip)) {
-      setSport(chip);
-      if (onSearch) onSearch({ region, dtype, sport: chip, query });
+      nextSport = chip; setSport(chip);
     } else if (chip === '발달장애 아동') {
-      setDtype('자폐성');
-      if (onSearch) onSearch({ region, dtype: '자폐성', sport, query });
+      nextDtype = '자폐성'; setDtype('자폐성');
     } else if (chip === '주말 프로그램') {
-      if (onSearch) onSearch({ region, dtype, sport, query, weekend: true });
+      extra.weekend = true;
     }
+    if (onSearch) onSearch({ region, dtype: nextDtype, sport: nextSport, userLocation, ...extra });
+    document.getElementById('regions')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function handleLocationDetected(loc) {
+    setRegion(loc.short || loc.displayLabel);
+    if (onLocationDetected) onLocationDetected(loc);
+    if (onSearch) onSearch({ region: loc.short, dtype, sport, userLocation: loc });
     document.getElementById('regions')?.scrollIntoView({ behavior: 'smooth' });
   }
 
@@ -144,8 +231,12 @@ function Hero({ variant, onSearch }) {
     display:'block', width:'100%', textAlign:'left',
     padding:'10px 16px', background:'none', border:'none',
     cursor:'pointer', fontSize:14, fontWeight:500, color:'var(--ink)',
-    borderRadius:10,
+    borderRadius:10, fontFamily:'inherit',
   };
+
+  // 지역 필드 표시값
+  const regionLabel = region || '지역 선택';
+  const isGpsActive = userLocation && (region === userLocation.short || region === userLocation.displayLabel);
 
   return (
     <section className="hero" id="top">
@@ -167,16 +258,45 @@ function Hero({ variant, onSearch }) {
 
             {/* Search card */}
             <form className="hero-search-card" role="search" onSubmit={handleSearch}>
-              {/* Region dropdown */}
-              <div className="field" tabIndex={0} onClick={() => {setRegionOpen(v=>!v);setDtypeOpen(false);setSportOpen(false);}}
+              {/* Region field — GPS 또는 직접 선택 */}
+              <div className="field" tabIndex={0}
+                onClick={() => { setRegionOpen(v=>!v); setDtypeOpen(false); setSportOpen(false); }}
                 style={{ position:'relative', cursor:'pointer' }}>
-                <span className="label">지역</span>
-                <span className="value">
-                  <Icon name="map-pin" size={13} stroke={2.2}/>&nbsp;{region}
-                  <Icon name="chevron-down" size={12} style={{marginLeft:4}}/>
+                <span className="label" style={{ display:'flex', alignItems:'center', gap:4 }}>
+                  지역
+                  {isGpsActive && (
+                    <span style={{
+                      fontSize:9, fontWeight:800, color:'var(--badge-business)',
+                      background:'var(--badge-business-bg)', borderRadius:4,
+                      padding:'1px 5px', letterSpacing:0.3, textTransform:'uppercase',
+                    }}>GPS</span>
+                  )}
+                </span>
+                <span className="value" style={{ display:'flex', alignItems:'center', gap:4 }}>
+                  <Icon name="map-pin" size={13} stroke={2.2}
+                    color={isGpsActive ? 'var(--badge-business)' : 'currentColor'}/>
+                  <span style={{
+                    color: isGpsActive ? 'var(--ink)' : region ? 'var(--ink)' : 'var(--ink-slate)',
+                    fontWeight: isGpsActive ? 700 : 500,
+                  }}>
+                    {regionLabel}
+                  </span>
+                  <Icon name="chevron-down" size={12}/>
                 </span>
                 {regionOpen && (
                   <div style={dropStyle} onClick={e=>e.stopPropagation()}>
+                    {/* GPS 감지 버튼 */}
+                    <div style={{ padding:'4px 8px 8px' }}>
+                      <GpsButton onLocationDetected={loc => {
+                        handleLocationDetected(loc);
+                        setRegionOpen(false);
+                      }}/>
+                    </div>
+                    <div style={{
+                      margin:'0 8px 8px', height:1,
+                      background:'var(--border-soft)',
+                    }}/>
+                    {/* 수동 선택 */}
                     {REGIONS.map(r => (
                       <button key={r} style={{
                         ...dropItem,
@@ -190,13 +310,14 @@ function Hero({ variant, onSearch }) {
                 )}
               </div>
 
-              {/* Disability type dropdown */}
-              <div className="field" tabIndex={0} onClick={() => {setDtypeOpen(v=>!v);setRegionOpen(false);setSportOpen(false);}}
+              {/* Disability type */}
+              <div className="field" tabIndex={0}
+                onClick={() => { setDtypeOpen(v=>!v); setRegionOpen(false); setSportOpen(false); }}
                 style={{ position:'relative', cursor:'pointer' }}>
                 <span className="label">장애 유형</span>
-                <span className={`value ${dtype?'':'placeholder'}`}>
+                <span className={`value ${dtype?'':'placeholder'}`} style={{ display:'flex', alignItems:'center', gap:4 }}>
                   {dtype || '전체 유형'}
-                  <Icon name="chevron-down" size={12} style={{marginLeft:4}}/>
+                  <Icon name="chevron-down" size={12}/>
                 </span>
                 {dtypeOpen && (
                   <div style={dropStyle} onClick={e=>e.stopPropagation()}>
@@ -215,13 +336,14 @@ function Hero({ variant, onSearch }) {
                 )}
               </div>
 
-              {/* Sport dropdown */}
-              <div className="field" tabIndex={0} onClick={() => {setSportOpen(v=>!v);setRegionOpen(false);setDtypeOpen(false);}}
+              {/* Sport */}
+              <div className="field" tabIndex={0}
+                onClick={() => { setSportOpen(v=>!v); setRegionOpen(false); setDtypeOpen(false); }}
                 style={{ position:'relative', cursor:'pointer' }}>
                 <span className="label">운동 종목</span>
-                <span className={`value ${sport?'':'placeholder'}`}>
+                <span className={`value ${sport?'':'placeholder'}`} style={{ display:'flex', alignItems:'center', gap:4 }}>
                   {sport || '전체 보기'}
-                  <Icon name="chevron-down" size={12} style={{marginLeft:4}}/>
+                  <Icon name="chevron-down" size={12}/>
                 </span>
                 {sportOpen && (
                   <div style={dropStyle} onClick={e=>e.stopPropagation()}>
@@ -246,8 +368,24 @@ function Hero({ variant, onSearch }) {
               </button>
             </form>
 
+            {/* GPS 위치 감지 CTA (검색카드 하단) */}
+            <div style={{
+              marginTop:14, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap',
+            }}>
+              <GpsButton onLocationDetected={handleLocationDetected}/>
+              {userLocation && (
+                <span style={{ fontSize:12.5, color:'var(--ink-slate)', display:'flex', alignItems:'center', gap:5 }}>
+                  <Icon name="map-pin" size={12} stroke={2} color="var(--badge-business)"/>
+                  <span>
+                    <strong style={{ color:'var(--ink)' }}>{userLocation.short}</strong>
+                    {userLocation.accuracy && ` · 정확도 ${Math.round(userLocation.accuracy)}m`}
+                  </span>
+                </span>
+              )}
+            </div>
+
             {/* Quick chips */}
-            <div className="hero-quick-chips">
+            <div className="hero-quick-chips" style={{ marginTop:16 }}>
               <span style={{ fontSize:12, color:'var(--ink-slate)', fontWeight:600, padding:'7px 4px 7px 0' }}>
                 인기 검색
               </span>
@@ -259,9 +397,9 @@ function Hero({ variant, onSearch }) {
             </div>
           </div>
 
-          {variant==='photo' ? <PhotoCollage/>
+          {variant==='photo'   ? <PhotoCollage/>
            : variant==='search' ? <BigSearchSide/>
-           : <Constellation/>}
+           : <Constellation userLocation={userLocation}/>}
         </div>
       </div>
     </section>
@@ -272,13 +410,13 @@ function PhotoCollage() {
   const portraits = [
     { sport:'수영',       sub:'서대문', size:180, top:4,  left:8,
       fill:'radial-gradient(circle at 30% 25%, #BFE2F2 0%, #5DA8CF 60%, #1B5F88 100%)' },
-    { sport:'휠체어 농구', sub:'강남',   size:220, top:22, left:42,
+    { sport:'휠체어 농구', sub:'강남',  size:220, top:22, left:42,
       fill:'radial-gradient(circle at 30% 25%, #FCC9A1 0%, #F37338 55%, #9A3A0A 100%)' },
-    { sport:'요가',       sub:'마포',   size:140, top:56, left:4,
+    { sport:'요가',       sub:'마포',  size:140, top:56, left:4,
       fill:'radial-gradient(circle at 30% 25%, #F4D9D2 0%, #D38A86 60%, #8B3A3A 100%)' },
-    { sport:'댄스',       sub:'송파',   size:160, top:60, left:56,
+    { sport:'댄스',       sub:'송파',  size:160, top:60, left:56,
       fill:'radial-gradient(circle at 30% 25%, #E7DBF2 0%, #9A82C7 60%, #4F3A8E 100%)' },
-    { sport:'등산',       sub:'관악',   size:110, top:6,  left:70,
+    { sport:'등산',       sub:'관악',  size:110, top:6,  left:70,
       fill:'radial-gradient(circle at 30% 25%, #D9EAD0 0%, #7BA76A 60%, #345E2D 100%)' },
   ];
   return (
@@ -334,6 +472,7 @@ function BigSearchSide() {
 }
 
 window.Hero = Hero;
+window.GpsButton = GpsButton;
 window.DISABILITY_TYPES = DISABILITY_TYPES;
 window.SPORTS = SPORTS;
 window.REGIONS = REGIONS;

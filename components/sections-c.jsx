@@ -1,13 +1,19 @@
 /* global React, Icon */
 
 /* ============================================================
-   Map preview — Google Maps iframe + overlay
+   Map preview — GPS 연동 Google Maps + 실시간 마커
    ============================================================ */
-function MapPreview({ searchFilters }) {
+function MapPreview({ searchFilters, userLocation: propUserLocation }) {
   const [filters, setFilters] = React.useState({
     verified: true, disabilityAccess: true, weekend: false, free: false,
   });
   const [activeMarker, setActiveMarker] = React.useState(1);
+  const [gpsLoading, setGpsLoading] = React.useState(false);
+  const [localUserLoc, setLocalUserLoc] = React.useState(null);
+  const [gpsError, setGpsError] = React.useState('');
+
+  // 부모에서 전달된 위치 또는 자체 GPS 상태
+  const userLocation = propUserLocation || localUserLoc;
 
   const FACILITIES_ON_MAP = [
     { id:1, name:'서대문구장애인복지관', type:'공공', lat:37.579, lng:126.937,
@@ -30,8 +36,41 @@ function MapPreview({ searchFilters }) {
       gradient:'radial-gradient(circle at 30% 25%, #E7DBF2 0%, #9A82C7 60%, #4F3A8E 100%)', badge:'business' },
   ];
 
-  const mapSrc = "https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d50000!2d126.9368!3d37.5791!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sko!2skr!4v1700000000000!5m2!1sko!2skr";
-  const active = FACILITIES_ON_MAP.find(f => f.id === activeMarker);
+  // 거리 계산 (GPS 있을 때)
+  const facilitiesWithDist = React.useMemo(() => {
+    if (!userLocation?.lat || !window.GeoUtils) return FACILITIES_ON_MAP;
+    return FACILITIES_ON_MAP.map(f => ({
+      ...f,
+      distKm: window.GeoUtils.haversineKm(userLocation.lat, userLocation.lng, f.lat, f.lng),
+    })).sort((a, b) => a.distKm - b.distKm);
+  }, [userLocation]);
+
+  // 지도 중심 좌표 (GPS → 실제 좌표, 아닐 시 서울 기본값)
+  const mapCenter = userLocation
+    ? { lat: userLocation.lat, lng: userLocation.lng, zoom: 13 }
+    : { lat: 37.5791, lng: 126.9368, zoom: 12 };
+
+  const mapSrc = window.GeoUtils
+    ? window.GeoUtils.buildGoogleMapsEmbedUrl(mapCenter.lat, mapCenter.lng, mapCenter.zoom)
+    : `https://maps.google.com/maps?q=${mapCenter.lat},${mapCenter.lng}&z=${mapCenter.zoom}&output=embed&hl=ko`;
+
+  // 지도 섹션 자체 GPS 감지
+  async function handleGpsClick() {
+    if (!window.GeoUtils) return;
+    setGpsLoading(true); setGpsError('');
+    try {
+      const pos = await window.GeoUtils.getCurrentPosition();
+      const geo = await window.GeoUtils.reverseGeocode(pos.lat, pos.lng);
+      setLocalUserLoc({ ...pos, ...geo });
+    } catch (err) {
+      setGpsError(err.message);
+      setTimeout(() => setGpsError(''), 5000);
+    } finally {
+      setGpsLoading(false);
+    }
+  }
+
+  const active = facilitiesWithDist.find(f => f.id === activeMarker) || facilitiesWithDist[0];
 
   return (
     <section className="band" id="map">
@@ -47,16 +86,62 @@ function MapPreview({ searchFilters }) {
             </h2>
           </div>
           <p style={{ fontSize:15.5, lineHeight:1.65, color:'var(--ink-charcoal)', maxWidth:460 }}>
-            Google Maps 기반 위치 검색. GPS로 자동 감지하고, 시·도 단위로
-            반경을 자동 확대해 농어촌 지역의 공백도 줄입니다.
-            (실서비스는 네이버 지도 API v3로 전환 예정)
+            {userLocation
+              ? <><strong style={{color:'var(--badge-business)'}}>GPS 위치 감지 중</strong> — {userLocation.short}을 중심으로 표시합니다.</>
+              : 'Google Maps 기반 위치 검색. GPS로 자동 감지하고, 시·도 단위로 반경을 자동 확대해 농어촌 지역의 공백도 줄입니다.'}
           </p>
         </div>
 
+        {/* GPS 상태 배너 */}
+        {userLocation ? (
+          <div style={{
+            display:'flex', alignItems:'center', gap:10, flexWrap:'wrap',
+            padding:'12px 20px', borderRadius:16, marginBottom:16,
+            background:'var(--badge-business-bg)',
+            border:'1px solid rgba(27,122,75,0.25)',
+          }}>
+            <Icon name="map-pin" size={16} color="var(--badge-business)"/>
+            <span style={{ fontSize:13.5, fontWeight:600, color:'var(--badge-business)' }}>
+              현재 위치: {userLocation.short}
+              {userLocation.accuracy && <span style={{fontWeight:400, opacity:0.8}}> · 정확도 {Math.round(userLocation.accuracy)}m</span>}
+            </span>
+            <span style={{ marginLeft:'auto', fontSize:12, color:'var(--badge-business)', opacity:0.7 }}>
+              좌표 {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+            </span>
+          </div>
+        ) : (
+          <div style={{
+            display:'flex', alignItems:'center', gap:10, flexWrap:'wrap',
+            padding:'12px 20px', borderRadius:16, marginBottom:16,
+            background:'var(--canvas-lifted)',
+            border:'1px solid var(--border-soft)',
+          }}>
+            <Icon name="map-pin" size={16} color="var(--ink-slate)"/>
+            <span style={{ fontSize:13.5, color:'var(--ink-slate)' }}>서울 전체 기준으로 표시 중 —</span>
+            <button onClick={handleGpsClick} disabled={gpsLoading}
+              style={{
+                background:'var(--ink)', color:'#fff', border:'none',
+                borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700,
+                cursor:gpsLoading?'wait':'pointer', fontFamily:'inherit',
+                display:'inline-flex', alignItems:'center', gap:6,
+              }}>
+              {gpsLoading
+                ? <><span style={{animation:'spin 0.8s linear infinite', display:'inline-block'}}>⊙</span> 감지 중...</>
+                : <><Icon name="map-pin" size={13} color="#fff"/> 내 위치로 이동</>}
+            </button>
+            {gpsError && (
+              <span style={{ fontSize:12.5, color:'#C62828', display:'flex', alignItems:'center', gap:4 }}>
+                <Icon name="alert-circle" size={13} color="#C62828"/> {gpsError}
+              </span>
+            )}
+          </div>
+        )}
+
         <div className="map-frame">
           <iframe
+            key={`${mapCenter.lat}-${mapCenter.lng}`}
             src={mapSrc}
-            title="서울 특수체육 시설 지도"
+            title={userLocation ? `${userLocation.short} 특수체육 시설 지도` : '서울 특수체육 시설 지도'}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen
@@ -65,8 +150,10 @@ function MapPreview({ searchFilters }) {
           <div className="map-overlay">
             {/* Side panel */}
             <aside className="map-side-panel">
-              <div className="panel-title">서울 전체 · 반경 5km</div>
-              <div className="panel-count tnum">{FACILITIES_ON_MAP.length}개 시설</div>
+              <div className="panel-title">
+                {userLocation ? `${userLocation.displayLabel}` : '서울 전체'} · 반경 5km
+              </div>
+              <div className="panel-count tnum">{facilitiesWithDist.length}개 시설</div>
 
               <div className="panel-filters">
                 {[
@@ -100,19 +187,49 @@ function MapPreview({ searchFilters }) {
               </div>
             </aside>
 
-            {/* Markers */}
-            {FACILITIES_ON_MAP.map(f => (
+            {/* 내 위치 마커 (GPS 활성 시) */}
+            {userLocation && (
+              <div style={{
+                position:'absolute', top:'50%', left:'50%',
+                transform:'translate(-50%, -50%)',
+                zIndex:20, pointerEvents:'none',
+                display:'flex', flexDirection:'column', alignItems:'center', gap:4,
+              }}>
+                <div style={{
+                  width:20, height:20, borderRadius:'50%',
+                  background:'var(--badge-business)',
+                  border:'3px solid #fff',
+                  boxShadow:'0 0 0 4px rgba(27,122,75,0.25)',
+                  animation:'gpsPulse 2s ease-out infinite',
+                }}/>
+                <div style={{
+                  background:'var(--badge-business)', color:'#fff',
+                  borderRadius:999, padding:'3px 8px',
+                  fontSize:11, fontWeight:800, whiteSpace:'nowrap',
+                  boxShadow:'0 4px 12px rgba(0,0,0,0.2)',
+                }}>내 위치</div>
+              </div>
+            )}
+
+            {/* 시설 마커 */}
+            {facilitiesWithDist.map(f => (
               <button key={f.id}
                 className={`pin-marker ${f.badge==='instructor'?'amber':''}`}
                 style={{
                   top:f.top, left:f.left,
                   transform: f.id===activeMarker ? 'scale(1.2)' : 'scale(1)',
                   zIndex: f.id===activeMarker ? 10 : 5,
+                  flexDirection:'column', gap:0,
                 }}
                 onClick={() => setActiveMarker(f.id===activeMarker ? null : f.id)}
                 aria-label={f.name}
-                title={f.name}>
+                title={f.distKm != null ? `${f.name} (${window.GeoUtils?.formatDistance(f.distKm)||''})` : f.name}>
                 {f.id}
+                {f.distKm != null && window.GeoUtils && (
+                  <span style={{ fontSize:8, fontWeight:700, lineHeight:1, marginTop:1 }}>
+                    {window.GeoUtils.formatDistance(f.distKm)}
+                  </span>
+                )}
               </button>
             ))}
 
@@ -153,14 +270,19 @@ function MapPreview({ searchFilters }) {
                 <Icon name="plus" size={18}/>
               </button>
               <button style={{
-                width:44, height:44, borderRadius:'50%', background:'var(--orbit-rust)',
-                border:0, cursor:'pointer',
+                width:44, height:44, borderRadius:'50%',
+                background: gpsLoading ? '#aaa' : 'var(--orbit-rust)',
+                border:0, cursor:gpsLoading?'wait':'pointer',
                 boxShadow:'0 8px 20px rgba(0,0,0,0.16)',
                 display:'flex', alignItems:'center', justifyContent:'center',
-                color:'#fff',
-              }} aria-label="현재 위치로"
-                onClick={() => navigator.geolocation?.getCurrentPosition(() => {}, () => {})}>
-                <Icon name="map-pin" size={18} stroke={2.2}/>
+                color:'#fff', transition:'background 200ms',
+              }} aria-label="현재 위치로 이동"
+                title="현재 위치로 이동"
+                onClick={handleGpsClick}
+                disabled={gpsLoading}>
+                {gpsLoading
+                  ? <span style={{animation:'spin 0.8s linear infinite', display:'inline-block', fontSize:18}}>⊙</span>
+                  : <Icon name="map-pin" size={18} stroke={2.2}/>}
               </button>
             </div>
           </div>
