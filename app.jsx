@@ -4,6 +4,7 @@
    TweaksPanel, TweakSection, TweakRadio, TweakToggle, TweakColor,
    useTweaks, Icon,
    AuthModal, FacilityDetailModal, ProviderRegisterModal,
+   NaverSetupModal, initNaverMaps, loadNaverMapsScript,
    SearchResultsBar
 */
 
@@ -35,10 +36,22 @@ function App() {
   const [facilityDetail, setFacilityDetail] = useState(null);
   const [providerRegModal, setProviderRegModal] = useState(null);
 
+  // Naver Maps 설정 모달
+  const [showNaverSetup, setShowNaverSetup] = useState(false);
+
   // Apply accent color
   useEffect(() => {
     document.documentElement.style.setProperty('--orbit-rust', t.accent);
   }, [t.accent]);
+
+  // 네이버 지도 초기화 (환경변수 → localStorage → 설정 모달 순)
+  useEffect(() => {
+    if (window.initNaverMaps) {
+      window.initNaverMaps().then(needsSetup => {
+        if (needsSetup) setShowNaverSetup(true);
+      });
+    }
+  }, []);
 
   // Init Supabase + auth listener
   useEffect(() => {
@@ -190,6 +203,17 @@ function App() {
           role={providerRegModal}
           onClose={() => setProviderRegModal(null)}
           user={user}
+        />
+      )}
+
+      {/* Naver Maps API 설정 모달 */}
+      {showNaverSetup && (
+        <NaverSetupModal
+          onClose={() => setShowNaverSetup(false)}
+          onConfigured={(clientId) => {
+            setShowNaverSetup(false);
+            window.loadNaverMapsScript(clientId);
+          }}
         />
       )}
     </div>

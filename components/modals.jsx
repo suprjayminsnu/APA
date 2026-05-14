@@ -295,7 +295,7 @@ function FacilityDetailModal({ facility: f, onClose, user, onLoginNeeded }) {
           <Icon name="star" size={15}/>
           관심 시설 저장
         </button>
-        <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(f.name)}`}
+        <a href={`https://map.naver.com/v5/search/${encodeURIComponent(f.name)}`}
           target="_blank" rel="noopener noreferrer"
           className="btn-pill-outline" style={{ textDecoration:'none' }}>
           <Icon name="map-pin" size={15}/>

@@ -114,9 +114,9 @@ function getResultsWithAutoExpand(facilities, userLat, userLng) {
   };
 }
 
-// ─── 구글 지도 embed URL (좌표 기반 동적 생성) ────────────
-function buildGoogleMapsEmbedUrl(lat, lng, zoom = 14) {
-  return `https://maps.google.com/maps?q=${lat},${lng}&z=${zoom}&output=embed&hl=ko`;
+// ─── 네이버 지도 검색 URL (시설명 검색) ───────────────────
+function buildNaverMapsSearchUrl(query) {
+  return `https://map.naver.com/v5/search/${encodeURIComponent(query)}`;
 }
 
 // ─── 전역 노출 ─────────────────────────────────────────────
@@ -128,5 +128,5 @@ window.GeoUtils = {
   sortFacilitiesByDistance,
   filterByRadius,
   getResultsWithAutoExpand,
-  buildGoogleMapsEmbedUrl,
+  buildNaverMapsSearchUrl,
 };

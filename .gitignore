@@ -1,0 +1,19 @@
+# 환경변수 — 절대 Git에 올리지 마세요
+.env
+.env.local
+.env.development
+.env.production
+
+# 로컬 개발 전용 네이버 API 설정 — 절대 Git에 올리지 마세요
+naver-config.local.js
+
+# 시스템 파일
+.DS_Store
+Thumbs.db
+
+# 에디터
+.vscode/settings.json
+.idea/
+
+# Node (혹시 패키지 추가 시)
+node_modules/

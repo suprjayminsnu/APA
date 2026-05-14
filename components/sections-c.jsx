@@ -1,76 +1,243 @@
 /* global React, Icon */
 
 /* ============================================================
-   Map preview — GPS 연동 Google Maps + 실시간 마커
+   시설 데이터 — 컴포넌트 외부 상수 (useEffect 의존성 문제 방지)
+   ============================================================ */
+var MAP_FACILITIES = [
+  { id:1, name:'서대문구장애인복지관', type:'공공', lat:37.579, lng:126.937,
+    programs:'수영·필라테스·풋살', badge:'public' },
+  { id:2, name:'연남 인클루시브 요가', type:'지도사', lat:37.562, lng:126.927,
+    programs:'요가·명상', badge:'instructor' },
+  { id:3, name:'강남구장애인체육관', type:'공공', lat:37.517, lng:127.047,
+    programs:'휠체어 농구·탁구', badge:'public' },
+  { id:4, name:'동작 키즈 발달체육', type:'사업자', lat:37.512, lng:126.939,
+    programs:'발달지원 체조·감각운동', badge:'business' },
+  { id:5, name:'관악 둘레길 등산', type:'지도사', lat:37.478, lng:126.952,
+    programs:'등산·걷기', badge:'instructor' },
+  { id:6, name:'송파 인클루시브 댄스', type:'사업자', lat:37.514, lng:127.106,
+    programs:'댄스·리듬체조', badge:'business' },
+];
+
+/* ============================================================
+   Map preview — 네이버 지도 API v3
    ============================================================ */
 function MapPreview({ searchFilters, userLocation: propUserLocation }) {
   const [filters, setFilters] = React.useState({
     verified: true, disabilityAccess: true, weekend: false, free: false,
   });
-  const [activeMarker, setActiveMarker] = React.useState(1);
   const [gpsLoading, setGpsLoading] = React.useState(false);
   const [localUserLoc, setLocalUserLoc] = React.useState(null);
   const [gpsError, setGpsError] = React.useState('');
+  const [mapError, setMapError] = React.useState('');
 
-  // 부모에서 전달된 위치 또는 자체 GPS 상태
+  // 네이버 SDK 준비 상태 — 이미 로드됐으면 즉시 true
+  const [naverReady, setNaverReady] = React.useState(
+    !!(window.naver && window.naver.maps)
+  );
+
+  // 지도 DOM 컨테이너 ref — 항상 렌더링되므로 항상 유효
+  const mapDivRef = React.useRef(null);
+  const mapObjRef = React.useRef(null);
+  const markersRef = React.useRef([]);
+  const infoWindowsRef = React.useRef([]);
+
   const userLocation = propUserLocation || localUserLoc;
 
-  const FACILITIES_ON_MAP = [
-    { id:1, name:'서대문구장애인복지관', type:'공공', lat:37.579, lng:126.937,
-      programs:'수영·필라테스·풋살', top:'38%', left:'22%',
-      gradient:'radial-gradient(circle at 30% 25%, #FCC9A1 0%, #F37338 60%, #9A3A0A 100%)', badge:'public' },
-    { id:2, name:'연남 인클루시브 요가', type:'지도사', lat:37.562, lng:126.927,
-      programs:'요가·명상', top:'52%', left:'38%',
-      gradient:'radial-gradient(circle at 30% 25%, #F4D9D2 0%, #D38A86 60%, #8B3A3A 100%)', badge:'instructor' },
-    { id:3, name:'강남구장애인체육관', type:'공공', lat:37.517, lng:127.047,
-      programs:'휠체어 농구·탁구', top:'34%', left:'56%',
-      gradient:'radial-gradient(circle at 30% 25%, #C0DDEB 0%, #5DA8CF 60%, #1B5F88 100%)', badge:'public' },
-    { id:4, name:'동작 키즈 발달체육', type:'사업자', lat:37.512, lng:126.939,
-      programs:'발달지원 체조·감각운동', top:'64%', left:'70%',
-      gradient:'radial-gradient(circle at 30% 25%, #FAE7C7 0%, #E8B560 60%, #A56B14 100%)', badge:'business' },
-    { id:5, name:'관악 둘레길 등산', type:'지도사', lat:37.478, lng:126.952,
-      programs:'등산·걷기', top:'46%', left:'80%',
-      gradient:'radial-gradient(circle at 30% 25%, #D9EAD0 0%, #7BA76A 60%, #345E2D 100%)', badge:'instructor' },
-    { id:6, name:'송파 인클루시브 댄스', type:'사업자', lat:37.514, lng:127.106,
-      programs:'댄스·리듬체조', top:'72%', left:'30%',
-      gradient:'radial-gradient(circle at 30% 25%, #E7DBF2 0%, #9A82C7 60%, #4F3A8E 100%)', badge:'business' },
-  ];
-
   // 거리 계산 (GPS 있을 때)
-  const facilitiesWithDist = React.useMemo(() => {
-    if (!userLocation?.lat || !window.GeoUtils) return FACILITIES_ON_MAP;
-    return FACILITIES_ON_MAP.map(f => ({
-      ...f,
-      distKm: window.GeoUtils.haversineKm(userLocation.lat, userLocation.lng, f.lat, f.lng),
-    })).sort((a, b) => a.distKm - b.distKm);
+  const facilitiesWithDist = React.useMemo(function () {
+    if (!userLocation || !userLocation.lat || !window.GeoUtils) return MAP_FACILITIES;
+    return MAP_FACILITIES.map(function (f) {
+      return Object.assign({}, f, {
+        distKm: window.GeoUtils.haversineKm(userLocation.lat, userLocation.lng, f.lat, f.lng),
+      });
+    }).sort(function (a, b) { return a.distKm - b.distKm; });
   }, [userLocation]);
 
-  // 지도 중심 좌표 (GPS → 실제 좌표, 아닐 시 서울 기본값)
-  const mapCenter = userLocation
-    ? { lat: userLocation.lat, lng: userLocation.lng, zoom: 13 }
-    : { lat: 37.5791, lng: 126.9368, zoom: 12 };
+  /* ----------------------------------------------------------
+     1. 네이버 SDK 준비 감지
+        이벤트 + 폴링 두 가지 모두 사용 — 타이밍 문제 완전 해결
+     ---------------------------------------------------------- */
+  React.useEffect(function () {
+    if (naverReady) return;
 
-  const mapSrc = window.GeoUtils
-    ? window.GeoUtils.buildGoogleMapsEmbedUrl(mapCenter.lat, mapCenter.lng, mapCenter.zoom)
-    : `https://maps.google.com/maps?q=${mapCenter.lat},${mapCenter.lng}&z=${mapCenter.zoom}&output=embed&hl=ko`;
+    function trySet() {
+      if (window.naver && window.naver.maps) {
+        setNaverReady(true);
+        return true;
+      }
+      return false;
+    }
 
-  // 지도 섹션 자체 GPS 감지
+    if (trySet()) return; // 이미 준비된 경우
+
+    window.addEventListener('naverMapsReady', trySet);
+    var pollId = setInterval(trySet, 500);
+
+    return function () {
+      window.removeEventListener('naverMapsReady', trySet);
+      clearInterval(pollId);
+    };
+  }, [naverReady]);
+
+  /* ----------------------------------------------------------
+     2. 지도 초기화 — naverReady가 true가 된 직후 실행
+        mapDivRef는 항상 렌더링되므로 항상 유효
+     ---------------------------------------------------------- */
+  React.useEffect(function () {
+    if (!naverReady || mapObjRef.current) return;
+
+    // DOM 커밋이 완료된 다음 tick에 실행
+    var timerId = setTimeout(function () {
+      if (!mapDivRef.current) return;
+
+      try {
+        var N = window.naver.maps;
+
+        var map = new N.Map(mapDivRef.current, {
+          center: new N.LatLng(37.5791, 126.9368),
+          zoom: 12,
+          mapTypeId: N.MapTypeId.NORMAL,
+          logoControlOptions: {
+            position: N.Position.BOTTOM_LEFT,
+          },
+          mapDataControlOptions: {
+            position: N.Position.BOTTOM_LEFT,
+          },
+        });
+        mapObjRef.current = map;
+
+        // 시설 마커 + InfoWindow
+        MAP_FACILITIES.forEach(function (f) {
+          var color = f.badge === 'public'   ? '#2A6FDB'
+                    : f.badge === 'business' ? '#CF4500'
+                    : '#F37338';
+
+          var marker = new N.Marker({
+            position: new N.LatLng(f.lat, f.lng),
+            map: map,
+            title: f.name,
+            icon: {
+              content: [
+                '<div style="',
+                  'background:' + color + ';',
+                  'color:#fff;',
+                  'border-radius:50%;',
+                  'width:32px;height:32px;',
+                  'display:flex;align-items:center;justify-content:center;',
+                  'font-size:12px;font-weight:800;',
+                  'border:2.5px solid #fff;',
+                  'box-shadow:0 2px 10px rgba(0,0,0,0.3);',
+                  'cursor:pointer;',
+                  'font-family:Pretendard,-apple-system,sans-serif;',
+                '">',
+                  f.id,
+                '</div>',
+              ].join(''),
+              anchor: new N.Point(16, 16),
+            },
+          });
+
+          var typeLabel = f.badge === 'public' ? '공공 인증'
+                        : f.badge === 'business' ? '사업자 인증'
+                        : '지도사 인증';
+          var typeColor = f.badge === 'public' ? '#2A6FDB'
+                        : f.badge === 'business' ? '#CF4500'
+                        : '#F37338';
+
+          var infoWindow = new N.InfoWindow({
+            content: [
+              '<div style="',
+                'padding:12px 16px;',
+                'min-width:180px;',
+                'font-family:Pretendard,-apple-system,sans-serif;',
+              '">',
+                '<div style="font-size:13.5px;font-weight:700;color:#1A1A18;margin-bottom:5px">',
+                  f.name,
+                '</div>',
+                '<div style="font-size:12px;color:' + typeColor + ';font-weight:600;margin-bottom:3px">',
+                  typeLabel,
+                '</div>',
+                '<div style="font-size:12px;color:#666">',
+                  f.programs,
+                '</div>',
+              '</div>',
+            ].join(''),
+            borderWidth: 0,
+            borderRadius: '14px',
+            disableAnchor: false,
+            backgroundColor: '#fff',
+            pixelOffset: new N.Point(0, -5),
+          });
+
+          N.Event.addListener(marker, 'click', function () {
+            infoWindowsRef.current.forEach(function (iw) { iw.close(); });
+            infoWindow.open(map, marker);
+          });
+
+          markersRef.current.push(marker);
+          infoWindowsRef.current.push(infoWindow);
+        });
+
+        // 지도 클릭 시 InfoWindow 닫기
+        N.Event.addListener(map, 'click', function () {
+          infoWindowsRef.current.forEach(function (iw) { iw.close(); });
+        });
+
+        console.log('[이음] 네이버 지도 초기화 완료');
+
+      } catch (err) {
+        console.error('[이음] 네이버 지도 초기화 실패:', err);
+        setMapError('지도를 불러오지 못했습니다. 콘솔을 확인하거나 API 키 / 허용 도메인 설정을 점검해 주세요.');
+      }
+    }, 0);
+
+    return function () {
+      clearTimeout(timerId);
+    };
+  }, [naverReady]);
+
+  /* ----------------------------------------------------------
+     3. 지도 정리 — 언마운트 시
+     ---------------------------------------------------------- */
+  React.useEffect(function () {
+    return function () {
+      markersRef.current.forEach(function (m) { try { m.setMap(null); } catch(e){} });
+      markersRef.current = [];
+      infoWindowsRef.current = [];
+      if (mapObjRef.current) {
+        try { mapObjRef.current.destroy(); } catch(e){}
+        mapObjRef.current = null;
+      }
+    };
+  }, []);
+
+  /* ----------------------------------------------------------
+     4. 위치 변경 시 지도 중심 이동
+     ---------------------------------------------------------- */
+  React.useEffect(function () {
+    if (!mapObjRef.current || !window.naver || !window.naver.maps) return;
+    var lat = userLocation ? userLocation.lat : 37.5791;
+    var lng = userLocation ? userLocation.lng : 126.9368;
+    var zoom = userLocation ? 13 : 12;
+    mapObjRef.current.setCenter(new window.naver.maps.LatLng(lat, lng));
+    mapObjRef.current.setZoom(zoom);
+  }, [userLocation && userLocation.lat, userLocation && userLocation.lng]);
+
+  // GPS 감지
   async function handleGpsClick() {
     if (!window.GeoUtils) return;
     setGpsLoading(true); setGpsError('');
     try {
-      const pos = await window.GeoUtils.getCurrentPosition();
-      const geo = await window.GeoUtils.reverseGeocode(pos.lat, pos.lng);
-      setLocalUserLoc({ ...pos, ...geo });
+      var pos = await window.GeoUtils.getCurrentPosition();
+      var geo = await window.GeoUtils.reverseGeocode(pos.lat, pos.lng);
+      setLocalUserLoc(Object.assign({}, pos, geo));
     } catch (err) {
       setGpsError(err.message);
-      setTimeout(() => setGpsError(''), 5000);
+      setTimeout(function () { setGpsError(''); }, 5000);
     } finally {
       setGpsLoading(false);
     }
   }
-
-  const active = facilitiesWithDist.find(f => f.id === activeMarker) || facilitiesWithDist[0];
 
   return (
     <section className="band" id="map">
@@ -88,7 +255,7 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
           <p style={{ fontSize:15.5, lineHeight:1.65, color:'var(--ink-charcoal)', maxWidth:460 }}>
             {userLocation
               ? <><strong style={{color:'var(--badge-business)'}}>GPS 위치 감지 중</strong> — {userLocation.short}을 중심으로 표시합니다.</>
-              : 'Google Maps 기반 위치 검색. GPS로 자동 감지하고, 시·도 단위로 반경을 자동 확대해 농어촌 지역의 공백도 줄입니다.'}
+              : '네이버 지도 기반 위치 검색. GPS로 자동 감지하고, 시·도 단위로 반경을 자동 확대해 농어촌 지역의 공백도 줄입니다.'}
           </p>
         </div>
 
@@ -103,7 +270,11 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
             <Icon name="map-pin" size={16} color="var(--badge-business)"/>
             <span style={{ fontSize:13.5, fontWeight:600, color:'var(--badge-business)' }}>
               현재 위치: {userLocation.short}
-              {userLocation.accuracy && <span style={{fontWeight:400, opacity:0.8}}> · 정확도 {Math.round(userLocation.accuracy)}m</span>}
+              {userLocation.accuracy && (
+                <span style={{fontWeight:400, opacity:0.8}}>
+                  {' '}· 정확도 {Math.round(userLocation.accuracy)}m
+                </span>
+              )}
             </span>
             <span style={{ marginLeft:'auto', fontSize:12, color:'var(--badge-business)', opacity:0.7 }}>
               좌표 {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
@@ -122,7 +293,7 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
               style={{
                 background:'var(--ink)', color:'#fff', border:'none',
                 borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700,
-                cursor:gpsLoading?'wait':'pointer', fontFamily:'inherit',
+                cursor:gpsLoading ? 'wait' : 'pointer', fontFamily:'inherit',
                 display:'inline-flex', alignItems:'center', gap:6,
               }}>
               {gpsLoading
@@ -137,146 +308,127 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
           </div>
         )}
 
-        <div className="map-frame">
-          <iframe
-            key={`${mapCenter.lat}-${mapCenter.lng}`}
-            src={mapSrc}
-            title={userLocation ? `${userLocation.short} 특수체육 시설 지도` : '서울 특수체육 시설 지도'}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            allowFullScreen
+        {/* 지도 영역 */}
+        <div className="map-frame" style={{ position:'relative' }}>
+
+          {/* 네이버 지도 컨테이너 — 항상 렌더링 (ref 안정성 확보) */}
+          <div
+            ref={mapDivRef}
+            style={{ width:'100%', height:'100%' }}
           />
 
+          {/* 로딩 오버레이 — SDK 준비 전 표시 */}
+          {!naverReady && !mapError && (
+            <div style={{
+              position:'absolute', inset:0, zIndex:4,
+              display:'flex', flexDirection:'column',
+              alignItems:'center', justifyContent:'center',
+              background:'#EDECEA', gap:12,
+              borderRadius:'inherit',
+            }}>
+              <div style={{
+                width:44, height:44, borderRadius:'50%',
+                border:'3px solid #ddd',
+                borderTopColor:'var(--orbit-rust)',
+                animation:'spin 0.9s linear infinite',
+              }}/>
+              <span style={{ fontSize:14, color:'var(--ink-slate)' }}>
+                네이버 지도 불러오는 중…
+              </span>
+              <span style={{ fontSize:12, color:'var(--ink-dust)' }}>
+                처음 로드 시 수초 소요될 수 있습니다
+              </span>
+            </div>
+          )}
+
+          {/* 에러 오버레이 */}
+          {mapError && (
+            <div style={{
+              position:'absolute', inset:0, zIndex:4,
+              display:'flex', flexDirection:'column',
+              alignItems:'center', justifyContent:'center',
+              background:'#FFF5F5', gap:12, padding:24,
+              borderRadius:'inherit',
+            }}>
+              <Icon name="alert-circle" size={28} color="#C62828"/>
+              <p style={{ fontSize:14, color:'#C62828', textAlign:'center', lineHeight:1.6, maxWidth:360 }}>
+                {mapError}
+              </p>
+            </div>
+          )}
+
+          {/* UI 오버레이 (사이드패널, GPS 버튼) */}
           <div className="map-overlay">
             {/* Side panel */}
             <aside className="map-side-panel">
               <div className="panel-title">
-                {userLocation ? `${userLocation.displayLabel}` : '서울 전체'} · 반경 5km
+                {userLocation ? userLocation.displayLabel : '서울 전체'} · 반경 5km
               </div>
               <div className="panel-count tnum">{facilitiesWithDist.length}개 시설</div>
 
               <div className="panel-filters">
                 {[
-                  { key:'verified', label:'인증 시설만', count:5 },
-                  { key:'disabilityAccess', label:'장애 접근 가능', count:6 },
-                  { key:'weekend', label:'주말 운영', count:3 },
-                  { key:'free', label:'무료 프로그램', count:1 },
-                ].map(f => (
+                  { key:'verified',        label:'인증 시설만',    count:5 },
+                  { key:'disabilityAccess',label:'장애 접근 가능', count:6 },
+                  { key:'weekend',         label:'주말 운영',      count:3 },
+                  { key:'free',            label:'무료 프로그램',  count:1 },
+                ].map(function (f) { return (
                   <div key={f.key} className="panel-filter"
-                    onClick={() => setFilters(prev => ({...prev, [f.key]:!prev[f.key]}))}
+                    onClick={function () { setFilters(function (prev) { return Object.assign({}, prev, { [f.key]: !prev[f.key] }); }); }}
                     style={{ cursor:'pointer' }}>
-                    <span className={`chk ${filters[f.key]?'on':''}`}>
+                    <span className={`chk ${filters[f.key] ? 'on' : ''}`}>
                       {filters[f.key] && <Icon name="check" size={12} stroke={3}/>}
                     </span>
-                    <span style={{ flex:1, color:filters[f.key]?'var(--ink)':'var(--ink-slate)' }}>
+                    <span style={{ flex:1, color:filters[f.key] ? 'var(--ink)' : 'var(--ink-slate)' }}>
                       {f.label}
                     </span>
                     <span style={{ color:'var(--ink-slate)', fontSize:12, fontWeight:600 }}>{f.count}</span>
                   </div>
-                ))}
+                ); })}
               </div>
 
-              <div style={{
-                marginTop:14, paddingTop:12,
-                borderTop:'1px solid var(--border-soft)',
-                fontSize:12, color:'var(--ink-slate)',
-                display:'flex', alignItems:'center', gap:6,
-              }}>
-                <Icon name="map-pin" size={12} stroke={2.2}/>
-                현재 위치 자동 감지 사용 중
+              {/* 시설 목록 */}
+              <div style={{ marginTop:14, paddingTop:12, borderTop:'1px solid var(--border-soft)' }}>
+                {facilitiesWithDist.map(function (f) { return (
+                  <div key={f.id} style={{
+                    display:'flex', alignItems:'center', gap:8,
+                    padding:'6px 0', fontSize:12, color:'var(--ink-charcoal)',
+                    borderBottom:'1px solid var(--border-soft)',
+                  }}>
+                    <span style={{
+                      background: f.badge === 'public' ? '#2A6FDB' : f.badge === 'business' ? '#CF4500' : '#F37338',
+                      color:'#fff', borderRadius:'50%',
+                      width:20, height:20, flexShrink:0,
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      fontSize:10, fontWeight:800,
+                    }}>{f.id}</span>
+                    <span style={{ flex:1, fontWeight:600 }}>{f.name}</span>
+                    {f.distKm != null && window.GeoUtils && (
+                      <span style={{ color:'var(--ink-slate)', fontSize:11 }}>
+                        {window.GeoUtils.formatDistance(f.distKm)}
+                      </span>
+                    )}
+                  </div>
+                ); })}
               </div>
             </aside>
 
-            {/* 내 위치 마커 (GPS 활성 시) */}
-            {userLocation && (
-              <div style={{
-                position:'absolute', top:'50%', left:'50%',
-                transform:'translate(-50%, -50%)',
-                zIndex:20, pointerEvents:'none',
-                display:'flex', flexDirection:'column', alignItems:'center', gap:4,
-              }}>
-                <div style={{
-                  width:20, height:20, borderRadius:'50%',
-                  background:'var(--badge-business)',
-                  border:'3px solid #fff',
-                  boxShadow:'0 0 0 4px rgba(27,122,75,0.25)',
-                  animation:'gpsPulse 2s ease-out infinite',
-                }}/>
-                <div style={{
-                  background:'var(--badge-business)', color:'#fff',
-                  borderRadius:999, padding:'3px 8px',
-                  fontSize:11, fontWeight:800, whiteSpace:'nowrap',
-                  boxShadow:'0 4px 12px rgba(0,0,0,0.2)',
-                }}>내 위치</div>
-              </div>
-            )}
-
-            {/* 시설 마커 */}
-            {facilitiesWithDist.map(f => (
-              <button key={f.id}
-                className={`pin-marker ${f.badge==='instructor'?'amber':''}`}
-                style={{
-                  top:f.top, left:f.left,
-                  transform: f.id===activeMarker ? 'scale(1.2)' : 'scale(1)',
-                  zIndex: f.id===activeMarker ? 10 : 5,
-                  flexDirection:'column', gap:0,
-                }}
-                onClick={() => setActiveMarker(f.id===activeMarker ? null : f.id)}
-                aria-label={f.name}
-                title={f.distKm != null ? `${f.name} (${window.GeoUtils?.formatDistance(f.distKm)||''})` : f.name}>
-                {f.id}
-                {f.distKm != null && window.GeoUtils && (
-                  <span style={{ fontSize:8, fontWeight:700, lineHeight:1, marginTop:1 }}>
-                    {window.GeoUtils.formatDistance(f.distKm)}
-                  </span>
-                )}
-              </button>
-            ))}
-
-            {/* Popup card */}
-            {active && (
-              <div className="pin-card" style={{
-                top:`calc(${active.top} - 100px)`,
-                left:`calc(${active.left} - 20px)`,
-              }}>
-                <div className="mini-portrait" style={{ background:active.gradient }}/>
-                <div>
-                  <div className="mini-name">{active.name}</div>
-                  <div className="mini-sub">
-                    <span style={{
-                      color: active.badge==='public' ? 'var(--badge-public)'
-                           : active.badge==='business' ? 'var(--badge-business)'
-                           : 'var(--badge-instructor)',
-                      fontWeight:700,
-                    }}>{active.type}</span>
-                    &nbsp;· {active.programs}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Zoom controls */}
+            {/* GPS 버튼 */}
             <div style={{
               position:'absolute', right:24, bottom:24,
               display:'flex', flexDirection:'column', gap:8,
               pointerEvents:'auto',
             }}>
-              <button style={{
-                width:44, height:44, borderRadius:'50%', background:'#fff',
-                border:0, cursor:'pointer',
-                boxShadow:'0 8px 20px rgba(0,0,0,0.16)',
-                display:'flex', alignItems:'center', justifyContent:'center',
-              }} aria-label="확대">
-                <Icon name="plus" size={18}/>
-              </button>
-              <button style={{
-                width:44, height:44, borderRadius:'50%',
-                background: gpsLoading ? '#aaa' : 'var(--orbit-rust)',
-                border:0, cursor:gpsLoading?'wait':'pointer',
-                boxShadow:'0 8px 20px rgba(0,0,0,0.16)',
-                display:'flex', alignItems:'center', justifyContent:'center',
-                color:'#fff', transition:'background 200ms',
-              }} aria-label="현재 위치로 이동"
+              <button
+                style={{
+                  width:44, height:44, borderRadius:'50%',
+                  background: gpsLoading ? '#aaa' : 'var(--orbit-rust)',
+                  border:0, cursor: gpsLoading ? 'wait' : 'pointer',
+                  boxShadow:'0 8px 20px rgba(0,0,0,0.16)',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  color:'#fff', transition:'background 200ms',
+                }}
+                aria-label="현재 위치로 이동"
                 title="현재 위치로 이동"
                 onClick={handleGpsClick}
                 disabled={gpsLoading}>
@@ -289,7 +441,7 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
         </div>
 
         <p style={{ marginTop:16, fontSize:12.5, color:'var(--ink-slate)', textAlign:'right' }}>
-          * 지도 마커는 실제 시설 위치를 기반으로 합니다. 실서비스에서는 네이버 지도 API v3로 전환됩니다.
+          * 마커는 실제 시설 좌표 기반입니다. 네이버 지도 API v3로 운영됩니다.
         </p>
       </div>
     </section>
