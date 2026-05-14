@@ -21,7 +21,7 @@
       if (!id) return;
       var s = document.createElement('script');
       s.type = 'text/javascript';
-      s.src = 'https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + id;
+      s.src = 'https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=' + id;
       s.onload = function () {
         window.__naverMapsLoaded = true;
         window.dispatchEvent(new CustomEvent('naverMapsReady'));

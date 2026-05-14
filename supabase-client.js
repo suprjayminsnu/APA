@@ -51,7 +51,26 @@ function onAuthStateChange(callback) {
 // ─── Facilities API ─────────────────────────────────────────────────────────
 
 async function fetchFacilities(filters = {}) {
-  if (!supabase) return { data: SAMPLE_FACILITIES, error: null };
+  if (!supabase) {
+    let results = [...SAMPLE_FACILITIES];
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      results = results.filter(f =>
+        f.name.toLowerCase().includes(q) ||
+        (f.region || '').toLowerCase().includes(q) ||
+        (f.district || '').toLowerCase().includes(q) ||
+        (f.programs || []).some(p => p.toLowerCase().includes(q))
+      );
+    }
+    if (filters.district)         results = results.filter(f => f.district === filters.district);
+    if (filters.disability_type)  results = results.filter(f => f.disability_types?.includes(filters.disability_type));
+    if (filters.sport)            results = results.filter(f => f.programs?.includes(filters.sport));
+    if (filters.verified_only)    results = results.filter(f => f.verified_at);
+    if (filters.seats_open)       results = results.filter(f => f.seats_open);
+    if (filters.free_only)        results = results.filter(f => f.is_free);
+    if (filters.weekend)          results = results.filter(f => f.has_weekend);
+    return { data: results, error: null };
+  }
 
   let query = supabase
     .from('facilities')

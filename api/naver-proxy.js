@@ -28,10 +28,10 @@ export default async function handler(req, res) {
 
   if (action === 'geocode' && query) {
     // 주소 → 좌표
-    naverUrl = `https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=${encodeURIComponent(query)}`;
+    naverUrl = `https://maps.apigw.ntruss.com/map-geocode/v2/geocode?query=${encodeURIComponent(query)}`;
   } else if (action === 'reverse' && lat && lng) {
     // 좌표 → 주소
-    naverUrl = `https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords=${lng},${lat}&output=json&orders=roadaddr,addr`;
+    naverUrl = `https://maps.apigw.ntruss.com/map-reversegeocode/v2/gc?coords=${lng},${lat}&output=json&orders=legalcode,admcode,addr,roadaddr`;
   } else {
     return res.status(400).json({
       error: 'Invalid parameters',

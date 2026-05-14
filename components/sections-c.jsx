@@ -1,41 +1,29 @@
 /* global React, Icon */
 
 /* ============================================================
-   시설 데이터 — 컴포넌트 외부 상수 (useEffect 의존성 문제 방지)
-   ============================================================ */
-var MAP_FACILITIES = [
-  { id:1, name:'서대문구장애인복지관', type:'공공', lat:37.579, lng:126.937,
-    programs:'수영·필라테스·풋살', badge:'public' },
-  { id:2, name:'연남 인클루시브 요가', type:'지도사', lat:37.562, lng:126.927,
-    programs:'요가·명상', badge:'instructor' },
-  { id:3, name:'강남구장애인체육관', type:'공공', lat:37.517, lng:127.047,
-    programs:'휠체어 농구·탁구', badge:'public' },
-  { id:4, name:'동작 키즈 발달체육', type:'사업자', lat:37.512, lng:126.939,
-    programs:'발달지원 체조·감각운동', badge:'business' },
-  { id:5, name:'관악 둘레길 등산', type:'지도사', lat:37.478, lng:126.952,
-    programs:'등산·걷기', badge:'instructor' },
-  { id:6, name:'송파 인클루시브 댄스', type:'사업자', lat:37.514, lng:127.106,
-    programs:'댄스·리듬체조', badge:'business' },
-];
-
-/* ============================================================
    Map preview — 네이버 지도 API v3
+   실제 Supabase 데이터 + Naver Geocoding API 연동
    ============================================================ */
 function MapPreview({ searchFilters, userLocation: propUserLocation }) {
-  const [filters, setFilters] = React.useState({
-    verified: true, disabilityAccess: true, weekend: false, free: false,
+  const [uiFilters, setUiFilters] = React.useState({
+    verified: false, weekend: false, free: false,
   });
   const [gpsLoading, setGpsLoading] = React.useState(false);
   const [localUserLoc, setLocalUserLoc] = React.useState(null);
   const [gpsError, setGpsError] = React.useState('');
   const [mapError, setMapError] = React.useState('');
 
-  // 네이버 SDK 준비 상태 — 이미 로드됐으면 즉시 true
+  // 검색 상태
+  const [mapSearchQuery, setMapSearchQuery] = React.useState('');
+  const [mapFacilities, setMapFacilities] = React.useState([]);
+  const [dataLoading, setDataLoading] = React.useState(false);
+
+  // 네이버 SDK 준비 상태
   const [naverReady, setNaverReady] = React.useState(
     !!(window.naver && window.naver.maps)
   );
+  const [mapInitialized, setMapInitialized] = React.useState(false);
 
-  // 지도 DOM 컨테이너 ref — 항상 렌더링되므로 항상 유효
   const mapDivRef = React.useRef(null);
   const mapObjRef = React.useRef(null);
   const markersRef = React.useRef([]);
@@ -43,36 +31,95 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
 
   const userLocation = propUserLocation || localUserLoc;
 
-  // 거리 계산 (GPS 있을 때)
-  const facilitiesWithDist = React.useMemo(function () {
-    if (!userLocation || !userLocation.lat || !window.GeoUtils) return MAP_FACILITIES;
-    return MAP_FACILITIES.map(function (f) {
-      return Object.assign({}, f, {
-        distKm: window.GeoUtils.haversineKm(userLocation.lat, userLocation.lng, f.lat, f.lng),
+  /* ----------------------------------------------------------
+     표시 목록: 거리 계산 + UI 필터 적용
+     ---------------------------------------------------------- */
+  const displayFacilities = React.useMemo(function () {
+    var list = mapFacilities;
+
+    // UI 필터 적용 (client-side)
+    if (uiFilters.verified) list = list.filter(function(f) { return f.verified_at; });
+    if (uiFilters.weekend)  list = list.filter(function(f) { return f.has_weekend; });
+    if (uiFilters.free)     list = list.filter(function(f) { return f.is_free; });
+
+    // 거리 계산
+    if (userLocation && userLocation.lat && window.GeoUtils) {
+      list = list.map(function (f) {
+        if (!f.lat || !f.lng) return f;
+        return Object.assign({}, f, {
+          distKm: window.GeoUtils.haversineKm(userLocation.lat, userLocation.lng, f.lat, f.lng),
+        });
+      }).sort(function (a, b) {
+        return (a.distKm != null ? a.distKm : Infinity) - (b.distKm != null ? b.distKm : Infinity);
       });
-    }).sort(function (a, b) { return a.distKm - b.distKm; });
-  }, [userLocation]);
+    }
+
+    return list;
+  }, [mapFacilities, uiFilters, userLocation]);
 
   /* ----------------------------------------------------------
-     1. 네이버 SDK 준비 감지
-        이벤트 + 폴링 두 가지 모두 사용 — 타이밍 문제 완전 해결
+     Geocoding: lat/lng 없는 시설의 좌표를 Naver API로 획득
+     ---------------------------------------------------------- */
+  async function geocodeFacility(facility) {
+    if (facility.lat && facility.lng) return facility;
+    var query = facility.region || facility.district || facility.name;
+    try {
+      var res = await fetch('/api/naver-proxy?action=geocode&query=' + encodeURIComponent(query));
+      if (!res.ok) return facility;
+      var data = await res.json();
+      var addr = data.addresses && data.addresses[0];
+      if (addr) {
+        return Object.assign({}, facility, {
+          lat: parseFloat(addr.y),
+          lng: parseFloat(addr.x),
+        });
+      }
+    } catch (e) {}
+    return facility;
+  }
+
+  /* ----------------------------------------------------------
+     시설 데이터 로드 (Supabase → SAMPLE_FACILITIES fallback)
+     ---------------------------------------------------------- */
+  async function loadFacilities(query) {
+    setDataLoading(true);
+    try {
+      var filters = query ? { search: query } : {};
+      var result = await window.IeumAPI.fetchFacilities(filters);
+      var facilities = (!result.error && result.data) ? result.data : [];
+
+      // lat/lng 없는 시설 Naver Geocoding
+      var geocoded = await Promise.all(facilities.slice(0, 50).map(geocodeFacility));
+      setMapFacilities(geocoded);
+    } catch (err) {
+      console.error('[이음] 시설 로드 실패:', err);
+      setMapFacilities(window.SAMPLE_FACILITIES || []);
+    } finally {
+      setDataLoading(false);
+    }
+  }
+
+  /* ----------------------------------------------------------
+     1. 초기 데이터 로드
+     ---------------------------------------------------------- */
+  React.useEffect(function () {
+    loadFacilities('');
+  }, []);
+
+  /* ----------------------------------------------------------
+     2. 네이버 SDK 준비 감지 (이벤트 + 폴링)
      ---------------------------------------------------------- */
   React.useEffect(function () {
     if (naverReady) return;
 
     function trySet() {
-      if (window.naver && window.naver.maps) {
-        setNaverReady(true);
-        return true;
-      }
+      if (window.naver && window.naver.maps) { setNaverReady(true); return true; }
       return false;
     }
-
-    if (trySet()) return; // 이미 준비된 경우
+    if (trySet()) return;
 
     window.addEventListener('naverMapsReady', trySet);
     var pollId = setInterval(trySet, 500);
-
     return function () {
       window.removeEventListener('naverMapsReady', trySet);
       clearInterval(pollId);
@@ -80,124 +127,135 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
   }, [naverReady]);
 
   /* ----------------------------------------------------------
-     2. 지도 초기화 — naverReady가 true가 된 직후 실행
-        mapDivRef는 항상 렌더링되므로 항상 유효
+     3. 지도 초기화
      ---------------------------------------------------------- */
   React.useEffect(function () {
     if (!naverReady || mapObjRef.current) return;
 
-    // DOM 커밋이 완료된 다음 tick에 실행
     var timerId = setTimeout(function () {
       if (!mapDivRef.current) return;
-
       try {
         var N = window.naver.maps;
-
         var map = new N.Map(mapDivRef.current, {
           center: new N.LatLng(37.5791, 126.9368),
-          zoom: 12,
+          zoom: 11,
           mapTypeId: N.MapTypeId.NORMAL,
-          logoControlOptions: {
-            position: N.Position.BOTTOM_LEFT,
-          },
-          mapDataControlOptions: {
-            position: N.Position.BOTTOM_LEFT,
-          },
+          logoControlOptions: { position: N.Position.BOTTOM_LEFT },
+          mapDataControlOptions: { position: N.Position.BOTTOM_LEFT },
         });
         mapObjRef.current = map;
 
-        // 시설 마커 + InfoWindow
-        MAP_FACILITIES.forEach(function (f) {
-          var color = f.badge === 'public'   ? '#2A6FDB'
-                    : f.badge === 'business' ? '#CF4500'
-                    : '#F37338';
-
-          var marker = new N.Marker({
-            position: new N.LatLng(f.lat, f.lng),
-            map: map,
-            title: f.name,
-            icon: {
-              content: [
-                '<div style="',
-                  'background:' + color + ';',
-                  'color:#fff;',
-                  'border-radius:50%;',
-                  'width:32px;height:32px;',
-                  'display:flex;align-items:center;justify-content:center;',
-                  'font-size:12px;font-weight:800;',
-                  'border:2.5px solid #fff;',
-                  'box-shadow:0 2px 10px rgba(0,0,0,0.3);',
-                  'cursor:pointer;',
-                  'font-family:Pretendard,-apple-system,sans-serif;',
-                '">',
-                  f.id,
-                '</div>',
-              ].join(''),
-              anchor: new N.Point(16, 16),
-            },
-          });
-
-          var typeLabel = f.badge === 'public' ? '공공 인증'
-                        : f.badge === 'business' ? '사업자 인증'
-                        : '지도사 인증';
-          var typeColor = f.badge === 'public' ? '#2A6FDB'
-                        : f.badge === 'business' ? '#CF4500'
-                        : '#F37338';
-
-          var infoWindow = new N.InfoWindow({
-            content: [
-              '<div style="',
-                'padding:12px 16px;',
-                'min-width:180px;',
-                'font-family:Pretendard,-apple-system,sans-serif;',
-              '">',
-                '<div style="font-size:13.5px;font-weight:700;color:#1A1A18;margin-bottom:5px">',
-                  f.name,
-                '</div>',
-                '<div style="font-size:12px;color:' + typeColor + ';font-weight:600;margin-bottom:3px">',
-                  typeLabel,
-                '</div>',
-                '<div style="font-size:12px;color:#666">',
-                  f.programs,
-                '</div>',
-              '</div>',
-            ].join(''),
-            borderWidth: 0,
-            borderRadius: '14px',
-            disableAnchor: false,
-            backgroundColor: '#fff',
-            pixelOffset: new N.Point(0, -5),
-          });
-
-          N.Event.addListener(marker, 'click', function () {
-            infoWindowsRef.current.forEach(function (iw) { iw.close(); });
-            infoWindow.open(map, marker);
-          });
-
-          markersRef.current.push(marker);
-          infoWindowsRef.current.push(infoWindow);
-        });
-
-        // 지도 클릭 시 InfoWindow 닫기
         N.Event.addListener(map, 'click', function () {
           infoWindowsRef.current.forEach(function (iw) { iw.close(); });
         });
 
+        setMapInitialized(true);
         console.log('[이음] 네이버 지도 초기화 완료');
-
       } catch (err) {
         console.error('[이음] 네이버 지도 초기화 실패:', err);
-        setMapError('지도를 불러오지 못했습니다. 콘솔을 확인하거나 API 키 / 허용 도메인 설정을 점검해 주세요.');
+        setMapError('지도를 불러오지 못했습니다. API 키 / 허용 도메인 설정을 확인하세요.');
       }
     }, 0);
 
-    return function () {
-      clearTimeout(timerId);
-    };
+    return function () { clearTimeout(timerId); };
   }, [naverReady]);
 
   /* ----------------------------------------------------------
-     3. 지도 정리 — 언마운트 시
+     4. 마커 업데이트 — displayFacilities 또는 지도 초기화 시
+     ---------------------------------------------------------- */
+  React.useEffect(function () {
+    if (!mapInitialized || !mapObjRef.current) return;
+
+    var N = window.naver.maps;
+    var map = mapObjRef.current;
+
+    // 기존 마커 제거
+    markersRef.current.forEach(function (m) { try { m.setMap(null); } catch(e){} });
+    markersRef.current = [];
+    infoWindowsRef.current.forEach(function (iw) { try { iw.close(); } catch(e){} });
+    infoWindowsRef.current = [];
+
+    var validFacilities = displayFacilities.filter(function(f) { return f.lat && f.lng; });
+
+    validFacilities.forEach(function (f, idx) {
+      var color = f.badge_type === 'public'   ? '#2A6FDB'
+                : f.badge_type === 'business' ? '#CF4500'
+                : '#F37338';
+
+      var marker = new N.Marker({
+        position: new N.LatLng(f.lat, f.lng),
+        map: map,
+        title: f.name,
+        icon: {
+          content: [
+            '<div style="',
+              'background:' + color + ';',
+              'color:#fff;',
+              'border-radius:50%;',
+              'width:32px;height:32px;',
+              'display:flex;align-items:center;justify-content:center;',
+              'font-size:11px;font-weight:800;',
+              'border:2.5px solid #fff;',
+              'box-shadow:0 2px 10px rgba(0,0,0,0.3);',
+              'cursor:pointer;',
+              'font-family:Pretendard,-apple-system,sans-serif;',
+            '">',
+              (idx + 1),
+            '</div>',
+          ].join(''),
+          anchor: new N.Point(16, 16),
+        },
+      });
+
+      var typeLabel = f.badge_type === 'public' ? '공공 인증'
+                    : f.badge_type === 'business' ? '사업자 인증'
+                    : '지도사 인증';
+      var typeColor = color;
+      var programText = Array.isArray(f.programs) ? f.programs.join(' · ') : (f.programs || '');
+
+      var infoWindow = new N.InfoWindow({
+        content: [
+          '<div style="padding:12px 16px;min-width:190px;font-family:Pretendard,-apple-system,sans-serif;">',
+            '<div style="font-size:13.5px;font-weight:700;color:#1A1A18;margin-bottom:5px">' + f.name + '</div>',
+            '<div style="font-size:12px;color:' + typeColor + ';font-weight:600;margin-bottom:4px">' + typeLabel + '</div>',
+            f.region ? '<div style="font-size:11.5px;color:#888;margin-bottom:4px">' + f.region + '</div>' : '',
+            programText ? '<div style="font-size:12px;color:#555">' + programText + '</div>' : '',
+            f.price_label ? '<div style="font-size:11.5px;color:#999;margin-top:4px">' + f.price_label + '</div>' : '',
+          '</div>',
+        ].join(''),
+        borderWidth: 0,
+        borderRadius: '14px',
+        disableAnchor: false,
+        backgroundColor: '#fff',
+        pixelOffset: new N.Point(0, -5),
+      });
+
+      (function(iw, mk) {
+        N.Event.addListener(mk, 'click', function () {
+          infoWindowsRef.current.forEach(function (w) { w.close(); });
+          iw.open(map, mk);
+        });
+      })(infoWindow, marker);
+
+      markersRef.current.push(marker);
+      infoWindowsRef.current.push(infoWindow);
+    });
+
+    // 검색 결과 bounds 맞추기 (사용자 위치 없을 때만)
+    if (!userLocation && validFacilities.length >= 2 && validFacilities.length <= 50) {
+      try {
+        var bounds = new N.LatLngBounds(
+          new N.LatLng(validFacilities[0].lat, validFacilities[0].lng),
+          new N.LatLng(validFacilities[0].lat, validFacilities[0].lng)
+        );
+        validFacilities.forEach(function(f) { bounds.extend(new N.LatLng(f.lat, f.lng)); });
+        map.fitBounds(bounds, { top: 60, right: 20, bottom: 20, left: 20 });
+      } catch(e) {}
+    }
+  }, [mapInitialized, displayFacilities]);
+
+  /* ----------------------------------------------------------
+     5. 언마운트 정리
      ---------------------------------------------------------- */
   React.useEffect(function () {
     return function () {
@@ -212,18 +270,15 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
   }, []);
 
   /* ----------------------------------------------------------
-     4. 위치 변경 시 지도 중심 이동
+     6. 위치 변경 시 지도 중심 이동
      ---------------------------------------------------------- */
   React.useEffect(function () {
-    if (!mapObjRef.current || !window.naver || !window.naver.maps) return;
-    var lat = userLocation ? userLocation.lat : 37.5791;
-    var lng = userLocation ? userLocation.lng : 126.9368;
-    var zoom = userLocation ? 13 : 12;
-    mapObjRef.current.setCenter(new window.naver.maps.LatLng(lat, lng));
-    mapObjRef.current.setZoom(zoom);
+    if (!mapObjRef.current || !window.naver || !window.naver.maps || !userLocation) return;
+    mapObjRef.current.setCenter(new window.naver.maps.LatLng(userLocation.lat, userLocation.lng));
+    mapObjRef.current.setZoom(13);
   }, [userLocation && userLocation.lat, userLocation && userLocation.lng]);
 
-  // GPS 감지
+  // GPS
   async function handleGpsClick() {
     if (!window.GeoUtils) return;
     setGpsLoading(true); setGpsError('');
@@ -238,6 +293,13 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
       setGpsLoading(false);
     }
   }
+
+  function handleSearchSubmit(e) {
+    e.preventDefault();
+    loadFacilities(mapSearchQuery.trim());
+  }
+
+  var visibleCount = displayFacilities.filter(function(f) { return f.lat && f.lng; }).length;
 
   return (
     <section className="band" id="map">
@@ -311,13 +373,10 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
         {/* 지도 영역 */}
         <div className="map-frame" style={{ position:'relative' }}>
 
-          {/* 네이버 지도 컨테이너 — 항상 렌더링 (ref 안정성 확보) */}
-          <div
-            ref={mapDivRef}
-            style={{ width:'100%', height:'100%' }}
-          />
+          {/* 네이버 지도 컨테이너 */}
+          <div ref={mapDivRef} style={{ width:'100%', height:'100%' }} />
 
-          {/* 로딩 오버레이 — SDK 준비 전 표시 */}
+          {/* SDK 로딩 오버레이 */}
           {!naverReady && !mapError && (
             <div style={{
               position:'absolute', inset:0, zIndex:4,
@@ -332,12 +391,8 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
                 borderTopColor:'var(--orbit-rust)',
                 animation:'spin 0.9s linear infinite',
               }}/>
-              <span style={{ fontSize:14, color:'var(--ink-slate)' }}>
-                네이버 지도 불러오는 중…
-              </span>
-              <span style={{ fontSize:12, color:'var(--ink-dust)' }}>
-                처음 로드 시 수초 소요될 수 있습니다
-              </span>
+              <span style={{ fontSize:14, color:'var(--ink-slate)' }}>네이버 지도 불러오는 중…</span>
+              <span style={{ fontSize:12, color:'var(--ink-dust)' }}>처음 로드 시 수초 소요될 수 있습니다</span>
             </div>
           )}
 
@@ -357,57 +412,130 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
             </div>
           )}
 
-          {/* UI 오버레이 (사이드패널, GPS 버튼) */}
-          <div className="map-overlay">
-            {/* Side panel */}
-            <aside className="map-side-panel">
-              <div className="panel-title">
-                {userLocation ? userLocation.displayLabel : '서울 전체'} · 반경 5km
-              </div>
-              <div className="panel-count tnum">{facilitiesWithDist.length}개 시설</div>
+          {/* ── 지도 내 검색창 — pointer-events:none인 map-overlay 밖에 직접 배치 ── */}
+          <form onSubmit={handleSearchSubmit} style={{
+            position:'absolute', top:16, left:'50%',
+            transform:'translateX(-50%)',
+            zIndex:10,
+            display:'flex',
+            boxShadow:'0 4px 24px rgba(0,0,0,0.22)',
+            borderRadius:999,
+            overflow:'hidden',
+            width:'min(400px, calc(100% - 240px))',
+          }}>
+            <input
+              type="text"
+              value={mapSearchQuery}
+              onChange={function(e) { setMapSearchQuery(e.target.value); }}
+              placeholder="시설명, 지역, 종목 검색…"
+              style={{
+                flex:1, padding:'11px 18px',
+                border:'none', outline:'none',
+                fontSize:13.5, fontFamily:'inherit',
+                background:'#fff', color:'var(--ink)',
+                minWidth:0,
+              }}
+            />
+            <button type="submit" disabled={dataLoading}
+              style={{
+                padding:'11px 18px',
+                background:'var(--orbit-rust)', color:'#fff',
+                border:'none', cursor:dataLoading ? 'wait' : 'pointer',
+                fontFamily:'inherit', fontSize:13, fontWeight:700,
+                display:'flex', alignItems:'center', gap:6,
+                flexShrink:0,
+              }}>
+              {dataLoading
+                ? <span style={{animation:'spin 0.8s linear infinite', display:'inline-block', fontSize:15}}>⊙</span>
+                : <Icon name="search" size={15} color="#fff" stroke={2.5}/>}
+            </button>
+          </form>
 
+          {/* UI 오버레이 */}
+          <div className="map-overlay">
+
+            {/* ── 사이드 패널 ── */}
+            <aside className="map-side-panel" style={{ pointerEvents:'auto' }}>
+              <div className="panel-title">
+                {userLocation ? (userLocation.displayLabel || userLocation.short) : '전체'}
+                {mapSearchQuery ? <span style={{color:'var(--orbit-rust)'}}> "{mapSearchQuery}"</span> : ''}
+              </div>
+              <div className="panel-count tnum">
+                {dataLoading
+                  ? <span style={{fontSize:12,color:'var(--ink-slate)'}}>검색 중…</span>
+                  : <>{visibleCount}개 시설</>}
+              </div>
+
+              {/* 필터 */}
               <div className="panel-filters">
                 {[
-                  { key:'verified',        label:'인증 시설만',    count:5 },
-                  { key:'disabilityAccess',label:'장애 접근 가능', count:6 },
-                  { key:'weekend',         label:'주말 운영',      count:3 },
-                  { key:'free',            label:'무료 프로그램',  count:1 },
+                  { key:'verified', label:'인증 시설만' },
+                  { key:'weekend',  label:'주말 운영' },
+                  { key:'free',     label:'무료 프로그램' },
                 ].map(function (f) { return (
                   <div key={f.key} className="panel-filter"
-                    onClick={function () { setFilters(function (prev) { return Object.assign({}, prev, { [f.key]: !prev[f.key] }); }); }}
+                    onClick={function () {
+                      setUiFilters(function (prev) {
+                        return Object.assign({}, prev, { [f.key]: !prev[f.key] });
+                      });
+                    }}
                     style={{ cursor:'pointer' }}>
-                    <span className={`chk ${filters[f.key] ? 'on' : ''}`}>
-                      {filters[f.key] && <Icon name="check" size={12} stroke={3}/>}
+                    <span className={'chk ' + (uiFilters[f.key] ? 'on' : '')}>
+                      {uiFilters[f.key] && <Icon name="check" size={12} stroke={3}/>}
                     </span>
-                    <span style={{ flex:1, color:filters[f.key] ? 'var(--ink)' : 'var(--ink-slate)' }}>
+                    <span style={{ flex:1, color:uiFilters[f.key] ? 'var(--ink)' : 'var(--ink-slate)' }}>
                       {f.label}
                     </span>
-                    <span style={{ color:'var(--ink-slate)', fontSize:12, fontWeight:600 }}>{f.count}</span>
                   </div>
                 ); })}
               </div>
 
               {/* 시설 목록 */}
-              <div style={{ marginTop:14, paddingTop:12, borderTop:'1px solid var(--border-soft)' }}>
-                {facilitiesWithDist.map(function (f) { return (
-                  <div key={f.id} style={{
-                    display:'flex', alignItems:'center', gap:8,
-                    padding:'6px 0', fontSize:12, color:'var(--ink-charcoal)',
+              <div style={{
+                marginTop:14, paddingTop:12,
+                borderTop:'1px solid var(--border-soft)',
+                overflowY:'auto', maxHeight:260,
+              }}>
+                {dataLoading ? (
+                  <div style={{ textAlign:'center', padding:'24px 0', color:'var(--ink-slate)', fontSize:13 }}>
+                    <span style={{animation:'spin 0.8s linear infinite', display:'inline-block', marginRight:6}}>⊙</span>
+                    데이터 불러오는 중…
+                  </div>
+                ) : displayFacilities.length === 0 ? (
+                  <div style={{ textAlign:'center', padding:'24px 0', color:'var(--ink-slate)', fontSize:13 }}>
+                    검색 결과가 없습니다
+                  </div>
+                ) : displayFacilities.map(function (f, idx) { return (
+                  <div key={f.id || idx} style={{
+                    display:'flex', alignItems:'flex-start', gap:8,
+                    padding:'8px 0', fontSize:12, color:'var(--ink-charcoal)',
                     borderBottom:'1px solid var(--border-soft)',
                   }}>
                     <span style={{
-                      background: f.badge === 'public' ? '#2A6FDB' : f.badge === 'business' ? '#CF4500' : '#F37338',
+                      background: f.badge_type === 'public' ? '#2A6FDB'
+                                : f.badge_type === 'business' ? '#CF4500' : '#F37338',
                       color:'#fff', borderRadius:'50%',
                       width:20, height:20, flexShrink:0,
                       display:'flex', alignItems:'center', justifyContent:'center',
-                      fontSize:10, fontWeight:800,
-                    }}>{f.id}</span>
-                    <span style={{ flex:1, fontWeight:600 }}>{f.name}</span>
-                    {f.distKm != null && window.GeoUtils && (
-                      <span style={{ color:'var(--ink-slate)', fontSize:11 }}>
-                        {window.GeoUtils.formatDistance(f.distKm)}
-                      </span>
-                    )}
+                      fontSize:10, fontWeight:800, marginTop:1,
+                    }}>{idx + 1}</span>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                        {f.name}
+                      </div>
+                      {f.region && (
+                        <div style={{ fontSize:11, color:'var(--ink-slate)', marginTop:1 }}>{f.region}</div>
+                      )}
+                    </div>
+                    <div style={{ flexShrink:0, textAlign:'right' }}>
+                      {f.distKm != null && window.GeoUtils ? (
+                        <span style={{ color:'var(--ink-slate)', fontSize:11 }}>
+                          {window.GeoUtils.formatDistance(f.distKm)}
+                        </span>
+                      ) : !f.lat ? (
+                        <span style={{ color:'var(--ink-dust)', fontSize:10 }}>위치 미등록</span>
+                      ) : null}
+                    </div>
                   </div>
                 ); })}
               </div>
@@ -441,7 +569,7 @@ function MapPreview({ searchFilters, userLocation: propUserLocation }) {
         </div>
 
         <p style={{ marginTop:16, fontSize:12.5, color:'var(--ink-slate)', textAlign:'right' }}>
-          * 마커는 실제 시설 좌표 기반입니다. 네이버 지도 API v3로 운영됩니다.
+          * 등록된 실제 시설 데이터 기반입니다. 네이버 지도 API v3로 운영됩니다.
         </p>
       </div>
     </section>
