@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 40" role="img" aria-label="Orbit mark">
+  <circle cx="20" cy="20" r="18" fill="#CF4500"></circle>
+  <circle cx="40" cy="20" r="18" fill="#F37338" fill-opacity="0.95"></circle>
+  <path d="M30 6.5 a18 18 0 0 1 0 27 a18 18 0 0 1 0 -27 z" fill="#9A3A0A"></path>
+</svg>

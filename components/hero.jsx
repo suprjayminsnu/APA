@@ -1,0 +1,339 @@
+/* global React, Icon, BrandMark */
+
+const REGIONS = [
+  '서울특별시', '부산광역시', '대구광역시', '인천광역시', '광주광역시',
+  '대전광역시', '울산광역시', '세종특별자치시', '경기도', '강원도',
+  '충청북도', '충청남도', '전라북도', '전라남도', '경상북도', '경상남도', '제주도',
+];
+
+const DISABILITY_TYPES = [
+  '지체장애', '청각장애', '시각장애', '뇌병변', '지적장애',
+  '신장장애', '정신장애', '자폐성', '언어장애', '간장애',
+  '장루·요루', '호흡기', '뇌전증', '심장장애', '안면장애',
+];
+
+const SPORTS = [
+  '수영', '요가', '볼링', '휠체어 농구', '댄스', '등산',
+  '필라테스', '탁구', '배드민턴', '풋살', '리듬체조', '명상',
+  '발달지원 체조', '감각운동', '걷기',
+];
+
+const QUICK_CHIPS = ['수영', '요가', '휠체어 농구', '볼링', '발달장애 아동', '주말 프로그램'];
+
+/* ============================================================
+   Constellation — sports portraits orbiting "you"
+   ============================================================ */
+function Constellation() {
+  const planets = [
+    { key:'swim',   sport:'수영',       meta:'11개 시설', cx:18, cy:22, size:130,
+      fill:'radial-gradient(circle at 30% 25%, #BFE2F2 0%, #5DA8CF 65%, #1B5F88 100%)', color:'#fff' },
+    { key:'yoga',   sport:'요가',       meta:'24개 시설', cx:78, cy:12, size:110,
+      fill:'radial-gradient(circle at 30% 25%, #F4D9D2 0%, #D38A86 60%, #8B3A3A 100%)', color:'#fff' },
+    { key:'bowl',   sport:'볼링',       meta:'6개 시설',  cx:91, cy:58, size:96,
+      fill:'radial-gradient(circle at 30% 25%, #FAE7C7 0%, #E8B560 60%, #A56B14 100%)', color:'#fff' },
+    { key:'wbball', sport:'휠체어\n농구', meta:'8개 시설',  cx:70, cy:88, size:120,
+      fill:'radial-gradient(circle at 30% 25%, #FCC9A1 0%, #F37338 55%, #9A3A0A 100%)', color:'#fff' },
+    { key:'dance',  sport:'댄스',       meta:'17개 시설', cx:22, cy:82, size:100,
+      fill:'radial-gradient(circle at 30% 25%, #E7DBF2 0%, #9A82C7 60%, #4F3A8E 100%)', color:'#fff' },
+    { key:'climb',  sport:'등산',       meta:'4개 시설',  cx:4,  cy:52, size:86,
+      fill:'radial-gradient(circle at 30% 25%, #D9EAD0 0%, #7BA76A 60%, #345E2D 100%)', color:'#fff' },
+  ];
+
+  return (
+    <div className="constellation" aria-hidden="true">
+      <svg className="arc-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="arcfade" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stopColor="#F37338" stopOpacity="0.0"/>
+            <stop offset="50%"  stopColor="#F37338" stopOpacity="0.5"/>
+            <stop offset="100%" stopColor="#F37338" stopOpacity="0.0"/>
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="38" fill="none" stroke="#F37338" strokeWidth="0.15"
+          strokeDasharray="0.6 0.8" opacity="0.45"/>
+        <circle cx="50" cy="50" r="46" fill="none" stroke="#F37338" strokeWidth="0.1"
+          strokeDasharray="0.6 1.2" opacity="0.25"/>
+        <path d="M 22 26 Q 50 5, 78 16" stroke="url(#arcfade)" strokeWidth="0.18" fill="none"/>
+        <path d="M 86 60 Q 95 72, 75 86" stroke="url(#arcfade)" strokeWidth="0.18" fill="none"/>
+        <path d="M 26 82 Q 50 95, 70 88" stroke="url(#arcfade)" strokeWidth="0.18" fill="none"/>
+        <path d="M 8 54 Q 12 32, 22 26" stroke="url(#arcfade)" strokeWidth="0.18" fill="none"/>
+      </svg>
+
+      <div className="center-portrait">
+        <span className="you-eyebrow">You · 당신</span>
+        <span className="you-name">우리 동네</span>
+        <span className="you-sub">서울 서대문구</span>
+      </div>
+
+      {planets.map(p => (
+        <div key={p.key} className="planet"
+          style={{
+            top:`${p.cy}%`, left:`${p.cx}%`,
+            width:p.size, height:p.size,
+            background:p.fill, color:p.color,
+            transform:'translate(-50%, -50%)',
+          }}>
+          <div className="planet-inner">
+            <div className="sport" style={{ fontSize:p.size>110?18:15, whiteSpace:'pre-line' }}>
+              {p.sport}
+            </div>
+            <div className="meta">{p.meta}</div>
+          </div>
+        </div>
+      ))}
+
+      <div style={{
+        position:'absolute', top:'50%', left:'50%',
+        transform:'translate(-50%, calc(-50% - 130px))',
+        background:'#fff', borderRadius:999, padding:'6px 12px 6px 8px',
+        boxShadow:'var(--shadow-1)',
+        display:'inline-flex', alignItems:'center', gap:8,
+        fontSize:12, fontWeight:600, color:'var(--ink)',
+        whiteSpace:'nowrap', zIndex:6,
+      }}>
+        <span style={{
+          width:18, height:18, borderRadius:'50%',
+          background:'var(--badge-business)',
+          display:'inline-flex', alignItems:'center',
+          justifyContent:'center', color:'#fff', fontSize:11, fontWeight:800,
+        }}>●</span>
+        지금 70개 프로그램 모집 중
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   Hero
+   ============================================================ */
+function Hero({ variant, onSearch }) {
+  const [region, setRegion]   = React.useState('서울특별시');
+  const [dtype,  setDtype]    = React.useState('');
+  const [sport,  setSport]    = React.useState('');
+  const [query,  setQuery]    = React.useState('');
+  const [regionOpen, setRegionOpen] = React.useState(false);
+  const [dtypeOpen,  setDtypeOpen]  = React.useState(false);
+  const [sportOpen,  setSportOpen]  = React.useState(false);
+
+  function handleSearch(e) {
+    e?.preventDefault();
+    if (onSearch) onSearch({ region, dtype, sport, query });
+    document.getElementById('regions')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function handleChip(chip) {
+    if (SPORTS.includes(chip)) {
+      setSport(chip);
+      if (onSearch) onSearch({ region, dtype, sport: chip, query });
+    } else if (chip === '발달장애 아동') {
+      setDtype('자폐성');
+      if (onSearch) onSearch({ region, dtype: '자폐성', sport, query });
+    } else if (chip === '주말 프로그램') {
+      if (onSearch) onSearch({ region, dtype, sport, query, weekend: true });
+    }
+    document.getElementById('regions')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  const dropStyle = {
+    position:'absolute', top:'calc(100% + 8px)', left:0,
+    background:'#fff', borderRadius:16, padding:8,
+    boxShadow:'var(--shadow-2)', zIndex:100,
+    minWidth:200, maxHeight:280, overflowY:'auto',
+  };
+  const dropItem = {
+    display:'block', width:'100%', textAlign:'left',
+    padding:'10px 16px', background:'none', border:'none',
+    cursor:'pointer', fontSize:14, fontWeight:500, color:'var(--ink)',
+    borderRadius:10,
+  };
+
+  return (
+    <section className="hero" id="top">
+      <div className="wrap">
+        <div className="hero-grid">
+          <div className="hero-copy">
+            <span className="eyebrow">
+              <span className="ko">우리 동네 특수체육</span>
+              <span className="en">/ Special sports, connected</span>
+            </span>
+            <h1 style={{ marginTop: 20 }}>
+              내게 맞는 운동을,<br/>
+              <span className="accent">걸어서 5분</span> 거리에서.
+            </h1>
+            <p className="lead">
+              등록 장애인 263만 명을 위한 통합 검색 플랫폼. 시·군·구 단위로
+              가까운 시설과 프로그램을 찾고 — 인증된 지도자에게 직접 연락하세요.
+            </p>
+
+            {/* Search card */}
+            <form className="hero-search-card" role="search" onSubmit={handleSearch}>
+              {/* Region dropdown */}
+              <div className="field" tabIndex={0} onClick={() => {setRegionOpen(v=>!v);setDtypeOpen(false);setSportOpen(false);}}
+                style={{ position:'relative', cursor:'pointer' }}>
+                <span className="label">지역</span>
+                <span className="value">
+                  <Icon name="map-pin" size={13} stroke={2.2}/>&nbsp;{region}
+                  <Icon name="chevron-down" size={12} style={{marginLeft:4}}/>
+                </span>
+                {regionOpen && (
+                  <div style={dropStyle} onClick={e=>e.stopPropagation()}>
+                    {REGIONS.map(r => (
+                      <button key={r} style={{
+                        ...dropItem,
+                        background: r === region ? 'var(--canvas)' : 'none',
+                        fontWeight: r === region ? 700 : 500,
+                      }} onClick={() => { setRegion(r); setRegionOpen(false); }}>
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Disability type dropdown */}
+              <div className="field" tabIndex={0} onClick={() => {setDtypeOpen(v=>!v);setRegionOpen(false);setSportOpen(false);}}
+                style={{ position:'relative', cursor:'pointer' }}>
+                <span className="label">장애 유형</span>
+                <span className={`value ${dtype?'':'placeholder'}`}>
+                  {dtype || '전체 유형'}
+                  <Icon name="chevron-down" size={12} style={{marginLeft:4}}/>
+                </span>
+                {dtypeOpen && (
+                  <div style={dropStyle} onClick={e=>e.stopPropagation()}>
+                    <button style={{...dropItem, color:'var(--ink-slate)'}}
+                      onClick={() => { setDtype(''); setDtypeOpen(false); }}>전체 유형</button>
+                    {DISABILITY_TYPES.map(d => (
+                      <button key={d} style={{
+                        ...dropItem,
+                        background: d === dtype ? 'var(--canvas)' : 'none',
+                        fontWeight: d === dtype ? 700 : 500,
+                      }} onClick={() => { setDtype(d); setDtypeOpen(false); }}>
+                        {d}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sport dropdown */}
+              <div className="field" tabIndex={0} onClick={() => {setSportOpen(v=>!v);setRegionOpen(false);setDtypeOpen(false);}}
+                style={{ position:'relative', cursor:'pointer' }}>
+                <span className="label">운동 종목</span>
+                <span className={`value ${sport?'':'placeholder'}`}>
+                  {sport || '전체 보기'}
+                  <Icon name="chevron-down" size={12} style={{marginLeft:4}}/>
+                </span>
+                {sportOpen && (
+                  <div style={dropStyle} onClick={e=>e.stopPropagation()}>
+                    <button style={{...dropItem, color:'var(--ink-slate)'}}
+                      onClick={() => { setSport(''); setSportOpen(false); }}>전체 보기</button>
+                    {SPORTS.map(s => (
+                      <button key={s} style={{
+                        ...dropItem,
+                        background: s === sport ? 'var(--canvas)' : 'none',
+                        fontWeight: s === sport ? 700 : 500,
+                      }} onClick={() => { setSport(s); setSportOpen(false); }}>
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <button type="submit" className="submit-btn" aria-label="검색">
+                <Icon name="search" size={17} stroke={2.5}/>
+                <span>찾기</span>
+              </button>
+            </form>
+
+            {/* Quick chips */}
+            <div className="hero-quick-chips">
+              <span style={{ fontSize:12, color:'var(--ink-slate)', fontWeight:600, padding:'7px 4px 7px 0' }}>
+                인기 검색
+              </span>
+              {QUICK_CHIPS.map(c => (
+                <button key={c} className="quick-chip" type="button" onClick={() => handleChip(c)}>
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {variant==='photo' ? <PhotoCollage/>
+           : variant==='search' ? <BigSearchSide/>
+           : <Constellation/>}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PhotoCollage() {
+  const portraits = [
+    { sport:'수영',       sub:'서대문', size:180, top:4,  left:8,
+      fill:'radial-gradient(circle at 30% 25%, #BFE2F2 0%, #5DA8CF 60%, #1B5F88 100%)' },
+    { sport:'휠체어 농구', sub:'강남',   size:220, top:22, left:42,
+      fill:'radial-gradient(circle at 30% 25%, #FCC9A1 0%, #F37338 55%, #9A3A0A 100%)' },
+    { sport:'요가',       sub:'마포',   size:140, top:56, left:4,
+      fill:'radial-gradient(circle at 30% 25%, #F4D9D2 0%, #D38A86 60%, #8B3A3A 100%)' },
+    { sport:'댄스',       sub:'송파',   size:160, top:60, left:56,
+      fill:'radial-gradient(circle at 30% 25%, #E7DBF2 0%, #9A82C7 60%, #4F3A8E 100%)' },
+    { sport:'등산',       sub:'관악',   size:110, top:6,  left:70,
+      fill:'radial-gradient(circle at 30% 25%, #D9EAD0 0%, #7BA76A 60%, #345E2D 100%)' },
+  ];
+  return (
+    <div className="constellation" aria-hidden="true" style={{ minHeight:560 }}>
+      {portraits.map((p,i) => (
+        <div key={i} style={{
+          position:'absolute', top:`${p.top}%`, left:`${p.left}%`,
+          width:p.size, height:p.size, borderRadius:'50%', background:p.fill,
+          boxShadow:'var(--shadow-2)',
+          display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+          color:'#fff', textAlign:'center',
+        }}>
+          <div style={{ fontSize:p.size>160?22:16, fontWeight:700 }}>{p.sport}</div>
+          <div style={{ fontSize:11, opacity:0.85, marginTop:2 }}>{p.sub}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function BigSearchSide() {
+  return (
+    <div style={{
+      position:'relative', borderRadius:40, overflow:'hidden',
+      background:'linear-gradient(165deg, #FCE0CC 0%, #F4A36F 50%, #CF4500 100%)',
+      minHeight:540, padding:32,
+      display:'flex', flexDirection:'column', justifyContent:'space-between',
+      color:'#fff', boxShadow:'var(--shadow-2)',
+    }}>
+      <div style={{ display:'flex', alignItems:'center', gap:10, fontSize:12, fontWeight:700, letterSpacing:1, textTransform:'uppercase' }}>
+        <span style={{ width:7, height:7, borderRadius:'50%', background:'#fff', display:'inline-block' }}/>
+        실시간 위치 기반
+      </div>
+      <div>
+        <div style={{ fontSize:14, fontWeight:600, opacity:0.85 }}>지금 우리 동네</div>
+        <div style={{ fontSize:88, fontWeight:700, letterSpacing:'-0.04em', lineHeight:1, marginTop:8 }}>
+          70<span style={{ fontSize:28, fontWeight:500, marginLeft:8 }}>개 프로그램</span>
+        </div>
+        <div style={{ marginTop:16, fontSize:14, fontWeight:500, opacity:0.92, lineHeight:1.55, maxWidth:380 }}>
+          오늘 모집 중인 특수체육 프로그램. 자동 위치 감지로 5km 안의 시설부터 보여드려요.
+        </div>
+      </div>
+      <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+        {['수영 12','요가 8','휠체어 농구 5','댄스 9','필라테스 6','+'].map(c => (
+          <span key={c} style={{
+            background:'rgba(255,255,255,0.22)', border:'1px solid rgba(255,255,255,0.45)',
+            color:'#fff', borderRadius:999, padding:'7px 14px', fontSize:13, fontWeight:600,
+          }}>{c}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+window.Hero = Hero;
+window.DISABILITY_TYPES = DISABILITY_TYPES;
+window.SPORTS = SPORTS;
+window.REGIONS = REGIONS;

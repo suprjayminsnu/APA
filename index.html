@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>이음 — 우리 동네 특수체육</title>
+  <meta name="description" content="등록 장애인 263만 명을 위한 통합 특수체육 검색 플랫폼. 시·군·구 단위로 가까운 시설과 인증된 지도자를 연결합니다."/>
+  <link rel="stylesheet" href="colors_and_type.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- Naver Maps API (Supabase 설정 후 아래 YOUR_CLIENT_ID를 교체하세요) -->
+  <!-- <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=YOUR_CLIENT_ID"></script> -->
+</head>
+<body>
+  <div id="root"></div>
+  <!-- Modal roots -->
+  <div id="modal-root"></div>
+
+  <!-- React -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+  <!-- App modules (Babel JSX) -->
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="supabase-client.js" data-type="module"></script>
+  <script src="supabase-client.js"></script>
+
+  <script type="text/babel" src="components/icons.jsx"></script>
+  <script type="text/babel" src="components/nav.jsx"></script>
+  <script type="text/babel" src="components/hero.jsx"></script>
+  <script type="text/babel" src="components/sections-a.jsx"></script>
+  <script type="text/babel" src="components/sections-b.jsx"></script>
+  <script type="text/babel" src="components/sections-c.jsx"></script>
+  <script type="text/babel" src="components/modals.jsx"></script>
+  <script type="text/babel" src="components/search-results.jsx"></script>
+
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>
