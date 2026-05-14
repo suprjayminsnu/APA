@@ -47,9 +47,15 @@ function App() {
   // 네이버 지도 초기화 (환경변수 → localStorage → 설정 모달 순)
   useEffect(() => {
     if (window.initNaverMaps) {
-      window.initNaverMaps().then(needsSetup => {
-        if (needsSetup) setShowNaverSetup(true);
-      });
+      window.initNaverMaps()
+        .then(needsSetup => {
+          if (needsSetup) setShowNaverSetup(true);
+        })
+        .catch(err => {
+          console.error('[이음] initNaverMaps 예외:', err);
+        });
+    } else {
+      console.error('[이음] initNaverMaps 함수를 찾을 수 없습니다. naver-setup-modal.jsx 로드 확인 필요.');
     }
   }, []);
 

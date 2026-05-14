@@ -210,50 +210,64 @@ function loadNaverMapsScript(clientId) {
    ============================================================ */
 async function initNaverMaps() {
   // 이미 로드된 경우
-  if (window.naver && window.naver.maps) return false;
+  if (window.naver && window.naver.maps) {
+    console.log('[이음] 네이버 지도 SDK 이미 로드됨');
+    return false;
+  }
 
   // 0순위: naver-config.local.js (로컬 개발 전용, gitignored)
   if (window.__NAVER_CLIENT_ID) {
+    console.log('[이음] 로컬 config로 SDK 로드 시도...');
     try {
       await loadNaverMapsScript(window.__NAVER_CLIENT_ID);
       window.__naverClientId = window.__NAVER_CLIENT_ID;
       console.log('[이음] 네이버 지도 API 연결됨 (로컬 config)');
       return false;
-    } catch {
-      console.warn('[이음] 로컬 config의 Client ID가 유효하지 않습니다.');
+    } catch (err) {
+      console.warn('[이음] 로컬 config SDK 로드 실패:', err.message);
     }
   }
 
   // 1순위: Vercel 환경변수 (/api/config 엔드포인트)
   try {
+    console.log('[이음] /api/config 호출 중...');
     const res = await fetch('/api/config');
     if (res.ok) {
       const config = await res.json();
+      console.log('[이음] /api/config 응답:', config);
       if (config.naverClientId) {
+        console.log('[이음] Vercel 환경변수로 SDK 로드 시도...');
         await loadNaverMapsScript(config.naverClientId);
         window.__naverClientId = config.naverClientId;
         console.log('[이음] 네이버 지도 API 연결됨 (Vercel 환경변수)');
         return false;
+      } else {
+        console.warn('[이음] NAVER_CLIENT_ID 환경변수가 Vercel에 설정되지 않았습니다.');
       }
+    } else {
+      console.warn('[이음] /api/config 응답 오류:', res.status);
     }
-  } catch {
-    // /api/config 없음 = 로컬 개발 환경
+  } catch (err) {
+    console.warn('[이음] /api/config 호출 실패 (로컬 환경):', err.message);
   }
 
   // 2순위: localStorage (팝업으로 이전에 입력한 값)
   const stored = localStorage.getItem(NAVER_ID_STORAGE_KEY);
   if (stored) {
+    console.log('[이음] localStorage 값으로 SDK 로드 시도...');
     try {
       await loadNaverMapsScript(stored);
       window.__naverClientId = stored;
       console.log('[이음] 네이버 지도 API 연결됨 (localStorage)');
       return false;
-    } catch {
+    } catch (err) {
+      console.warn('[이음] localStorage SDK 로드 실패:', err.message);
       localStorage.removeItem(NAVER_ID_STORAGE_KEY);
     }
   }
 
   // 3순위: 팝업 모달로 입력 요청
+  console.warn('[이음] 자동 설정 실패 — 설정 모달을 표시합니다.');
   return true;
 }
 
