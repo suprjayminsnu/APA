@@ -5,21 +5,21 @@
    ============================================================ */
 function DisabilityTypes({ onTypeSelect }) {
   const types = [
-    { ko:'지체장애',  en:'Physical',    count:47 },
-    { ko:'청각장애',  en:'Hearing',     count:32 },
-    { ko:'시각장애',  en:'Visual',      count:28 },
-    { ko:'뇌병변',   en:'Brain lesion', count:19 },
-    { ko:'지적장애',  en:'Intellectual', count:41 },
-    { ko:'신장장애',  en:'Renal',       count:7  },
-    { ko:'정신장애',  en:'Psychiatric', count:14 },
-    { ko:'자폐성',   en:'Autistic',     count:23 },
-    { ko:'언어장애',  en:'Speech',      count:11 },
-    { ko:'간장애',   en:'Liver',        count:4  },
-    { ko:'장루·요루', en:'Ostomy',      count:3  },
-    { ko:'호흡기',   en:'Respiratory',  count:6  },
-    { ko:'뇌전증',   en:'Epilepsy',     count:9  },
-    { ko:'심장장애',  en:'Cardiac',     count:5  },
-    { ko:'안면장애',  en:'Facial',      count:3  },
+    { ko:'지체장애',  en:'Physical'    },
+    { ko:'청각장애',  en:'Hearing'     },
+    { ko:'시각장애',  en:'Visual'      },
+    { ko:'뇌병변',   en:'Brain lesion' },
+    { ko:'지적장애',  en:'Intellectual' },
+    { ko:'신장장애',  en:'Renal'       },
+    { ko:'정신장애',  en:'Psychiatric' },
+    { ko:'자폐성',   en:'Autistic'     },
+    { ko:'언어장애',  en:'Speech'      },
+    { ko:'간장애',   en:'Liver'        },
+    { ko:'장루·요루', en:'Ostomy'      },
+    { ko:'호흡기',   en:'Respiratory'  },
+    { ko:'뇌전증',   en:'Epilepsy'     },
+    { ko:'심장장애',  en:'Cardiac'     },
+    { ko:'안면장애',  en:'Facial'      },
   ];
   const [selected, setSelected] = React.useState(null);
 
@@ -61,7 +61,6 @@ function DisabilityTypes({ onTypeSelect }) {
               aria-pressed={selected===t.ko}
               onClick={() => handleSelect(t.ko)}>
               <span className="label">{t.ko}</span>
-              <span className="count tnum">{t.count}</span>
             </button>
           ))}
         </div>
@@ -211,14 +210,6 @@ function TrustSystem() {
               표시되지 않으며 결과 하단에 노출됩니다.
             </p>
           </div>
-          <span style={{
-            display:'inline-flex', alignItems:'center', gap:8,
-            fontSize:12.5, fontWeight:600, color:'var(--ink-slate)',
-            padding:'8px 14px', background:'#fff', borderRadius:999,
-            border:'1px solid var(--border-soft)',
-          }}>
-            현재 인증 대기 <span style={{ color:'var(--ink)' }}>7건</span>
-          </span>
         </div>
       </div>
     </section>

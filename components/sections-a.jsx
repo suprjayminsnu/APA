@@ -3,18 +3,11 @@
 /* ============================================================
    Live ticker items — auto-updates every 8s
    ============================================================ */
-const TICKER_ITEMS = [
-  { facility:'서대문구장애인복지관', program:'휠체어 농구 초급반', type:'지체장애' },
-  { facility:'동작구체육센터', program:'자폐성장애 아동 수영 8명 모집', type:'자폐성' },
-  { facility:'관악구청년체육관', program:'발달장애 청년 댄스', type:'지적장애' },
-  { facility:'강남구장애인체육관', program:'탁구 동호회 신입 모집', type:'전체' },
-  { facility:'노원구복지관', program:'시각장애인 수영교실 추가 모집', type:'시각장애' },
-  { facility:'송파 인클루시브 댄스', program:'리듬체조 초급반 오픈', type:'지체장애' },
-  { facility:'마포구 요가센터', program:'청각장애 요가 주말반', type:'청각장애' },
-];
+const TICKER_ITEMS = [];
 
 function LiveTicker() {
   const [idx, setIdx] = React.useState(0);
+  if (TICKER_ITEMS.length === 0) return null;
   React.useEffect(() => {
     const t = setInterval(() => setIdx(i => (i + 1) % TICKER_ITEMS.length), 4000);
     return () => clearInterval(t);
@@ -197,15 +190,15 @@ window.FacilityCard = FacilityCard;
 function Neighborhoods({ dense, searchFilters, onDetail }) {
   const DISTRICTS = [
     { name:'내 근처', count:null, gps:true },
-    { name:'서대문구', count:12 }, { name:'마포구', count:9 },
-    { name:'강남구', count:18 }, { name:'송파구', count:14 },
-    { name:'관악구', count:8 },  { name:'동작구', count:7 },
-    { name:'종로구', count:6 },  { name:'노원구', count:11 },
+    { name:'서대문구' }, { name:'마포구' },
+    { name:'강남구' },  { name:'송파구' },
+    { name:'관악구' },  { name:'동작구' },
+    { name:'종로구' },  { name:'노원구' },
     { name:'+ 17개 자치구', count:null },
   ];
 
   const userLocation = searchFilters?.userLocation;
-  const [active, setActive] = React.useState(userLocation ? '내 근처' : '서대문구');
+  const [active, setActive] = React.useState('내 근처');
   const [facilities, setFacilities] = React.useState(window.SAMPLE_FACILITIES || []);
   const [loading, setLoading] = React.useState(false);
   const [gpsRadius, setGpsRadius] = React.useState(null); // 자동 확대 반경
