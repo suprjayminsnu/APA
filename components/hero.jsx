@@ -102,21 +102,6 @@ function GpsButton({ onLocationDetected }) {
    Constellation
    ============================================================ */
 function Constellation({ userLocation }) {
-  const planets = [
-    { key:'swim',   sport:'수영',       meta:'11개 시설', cx:18, cy:22, size:130,
-      fill:'radial-gradient(circle at 30% 25%, #BFE2F2 0%, #5DA8CF 65%, #1B5F88 100%)', color:'#fff' },
-    { key:'yoga',   sport:'요가',       meta:'24개 시설', cx:78, cy:12, size:110,
-      fill:'radial-gradient(circle at 30% 25%, #F4D9D2 0%, #D38A86 60%, #8B3A3A 100%)', color:'#fff' },
-    { key:'bowl',   sport:'볼링',       meta:'6개 시설',  cx:91, cy:58, size:96,
-      fill:'radial-gradient(circle at 30% 25%, #FAE7C7 0%, #E8B560 60%, #A56B14 100%)', color:'#fff' },
-    { key:'wbball', sport:'휠체어\n농구', meta:'8개 시설', cx:70, cy:88, size:120,
-      fill:'radial-gradient(circle at 30% 25%, #FCC9A1 0%, #F37338 55%, #9A3A0A 100%)', color:'#fff' },
-    { key:'dance',  sport:'댄스',       meta:'17개 시설', cx:22, cy:82, size:100,
-      fill:'radial-gradient(circle at 30% 25%, #E7DBF2 0%, #9A82C7 60%, #4F3A8E 100%)', color:'#fff' },
-    { key:'climb',  sport:'등산',       meta:'4개 시설',  cx:4,  cy:52, size:86,
-      fill:'radial-gradient(circle at 30% 25%, #D9EAD0 0%, #7BA76A 60%, #345E2D 100%)', color:'#fff' },
-  ];
-
   return (
     <div className="constellation" aria-hidden="true">
       <svg className="arc-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -140,38 +125,9 @@ function Constellation({ userLocation }) {
       <div className="center-portrait">
         <span className="you-eyebrow">You · 당신</span>
         <span className="you-name">우리 동네</span>
-        <span className="you-sub">
-          {userLocation ? userLocation.displayLabel : '서울 서대문구'}
-        </span>
-      </div>
-
-      {planets.map(p => (
-        <div key={p.key} className="planet"
-          style={{ top:`${p.cy}%`, left:`${p.cx}%`, width:p.size, height:p.size,
-            background:p.fill, color:p.color, transform:'translate(-50%, -50%)' }}>
-          <div className="planet-inner">
-            <div className="sport" style={{ fontSize:p.size>110?18:15, whiteSpace:'pre-line' }}>{p.sport}</div>
-            <div className="meta">{p.meta}</div>
-          </div>
-        </div>
-      ))}
-
-      <div style={{
-        position:'absolute', top:'50%', left:'50%',
-        transform:'translate(-50%, calc(-50% - 130px))',
-        background:'#fff', borderRadius:999, padding:'6px 12px 6px 8px',
-        boxShadow:'var(--shadow-1)',
-        display:'inline-flex', alignItems:'center', gap:8,
-        fontSize:12, fontWeight:600, color:'var(--ink)',
-        whiteSpace:'nowrap', zIndex:6,
-      }}>
-        <span style={{
-          width:18, height:18, borderRadius:'50%',
-          background:'var(--badge-business)',
-          display:'inline-flex', alignItems:'center',
-          justifyContent:'center', color:'#fff', fontSize:11, fontWeight:800,
-        }}>●</span>
-        지금 70개 프로그램 모집 중
+        {userLocation && (
+          <span className="you-sub">{userLocation.short || userLocation.displayLabel}</span>
+        )}
       </div>
     </div>
   );
