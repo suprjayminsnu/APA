@@ -192,7 +192,7 @@ function loadNaverMapsScript(clientId) {
     }
     const script = document.createElement('script');
     script.type = 'text/javascript';
-    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${clientId}`;
+    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${clientId}&submodules=geocoder`;
     script.async = true;
     script.onload = () => {
       // 지도가 준비됐음을 앱 전체에 알린다

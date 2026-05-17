@@ -10,8 +10,9 @@
 
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <!-- 로컬 개발 전용 네이버 Client ID (Git 제외됨) -->
+  <!-- 로컬 개발 전용 API 키 (Git 제외됨) -->
   <script src="naver-config.local.js" onerror="void 0"></script>
+  <script src="gemini-config.local.js" onerror="void 0"></script>
   <!-- 네이버 지도 SDK: React보다 먼저 로드해 타이밍 문제 방지
        로컬: naver-config.local.js의 __NAVER_CLIENT_ID 사용
        Vercel: 런타임에 /api/config → initNaverMaps 에서 처리 -->
@@ -21,7 +22,7 @@
       if (!id) return;
       var s = document.createElement('script');
       s.type = 'text/javascript';
-      s.src = 'https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=' + id;
+      s.src = 'https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=' + id + '&submodules=geocoder';
       s.onload = function () {
         window.__naverMapsLoaded = true;
         window.dispatchEvent(new CustomEvent('naverMapsReady'));
@@ -47,6 +48,7 @@
   <script type="text/babel" src="tweaks-panel.jsx"></script>
   <script src="supabase-client.js"></script>
   <script src="geo.js"></script>
+  <script src="facility-data.js"></script>
 
   <script type="text/babel" src="components/icons.jsx"></script>
   <script type="text/babel" src="components/nav.jsx"></script>

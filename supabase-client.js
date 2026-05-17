@@ -6,12 +6,13 @@ const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
 const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
 
 // Initialize Supabase client (loaded via CDN in index.html)
-let supabase = null;
+// NOTE: variable named _supabase to avoid conflict with global window.supabase from CDN
+let _supabase = null;
 
 function initSupabase() {
   if (typeof window.supabase !== 'undefined' &&
       SUPABASE_URL !== 'https://YOUR_PROJECT_ID.supabase.co') {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     console.log('[이음] Supabase 연결됨');
     return true;
   }
@@ -22,36 +23,36 @@ function initSupabase() {
 // ─── Auth helpers ───────────────────────────────────────────────────────────
 
 async function signUp(email, password, metadata = {}) {
-  if (!supabase) return { error: { message: 'Supabase가 설정되지 않았습니다.' } };
-  return supabase.auth.signUp({ email, password, options: { data: metadata } });
+  if (!_supabase) return { error: { message: 'Supabase가 설정되지 않았습니다.' } };
+  return _supabase.auth.signUp({ email, password, options: { data: metadata } });
 }
 
 async function signIn(email, password) {
-  if (!supabase) return { error: { message: 'Supabase가 설정되지 않았습니다.' } };
-  return supabase.auth.signInWithPassword({ email, password });
+  if (!_supabase) return { error: { message: 'Supabase가 설정되지 않았습니다.' } };
+  return _supabase.auth.signInWithPassword({ email, password });
 }
 
 async function signOut() {
-  if (!supabase) return;
-  return supabase.auth.signOut();
+  if (!_supabase) return;
+  return _supabase.auth.signOut();
 }
 
 async function getSession() {
-  if (!supabase) return null;
-  const { data } = await supabase.auth.getSession();
+  if (!_supabase) return null;
+  const { data } = await _supabase.auth.getSession();
   return data.session;
 }
 
 function onAuthStateChange(callback) {
-  if (!supabase) return () => {};
-  const { data: { subscription } } = supabase.auth.onAuthStateChange(callback);
+  if (!_supabase) return () => {};
+  const { data: { subscription } } = _supabase.auth.onAuthStateChange(callback);
   return () => subscription.unsubscribe();
 }
 
 // ─── Facilities API ─────────────────────────────────────────────────────────
 
 async function fetchFacilities(filters = {}) {
-  if (!supabase) {
+  if (!_supabase) {
     let results = [...SAMPLE_FACILITIES];
     if (filters.search) {
       const q = filters.search.toLowerCase();
@@ -72,7 +73,7 @@ async function fetchFacilities(filters = {}) {
     return { data: results, error: null };
   }
 
-  let query = supabase
+  let query = _supabase
     .from('facilities')
     .select(`
       id, name, region, district, badge_type,
@@ -98,16 +99,16 @@ async function fetchFacilities(filters = {}) {
 }
 
 async function fetchFacilityById(id) {
-  if (!supabase) {
+  if (!_supabase) {
     const f = SAMPLE_FACILITIES.find(f => f.id === id);
     return { data: f, error: null };
   }
-  return supabase.from('facilities').select('*').eq('id', id).single();
+  return _supabase.from('facilities').select('*').eq('id', id).single();
 }
 
 async function registerProvider(data) {
-  if (!supabase) return { error: { message: 'Supabase가 설정되지 않았습니다.' } };
-  return supabase.from('provider_registrations').insert([data]);
+  if (!_supabase) return { error: { message: 'Supabase가 설정되지 않았습니다.' } };
+  return _supabase.from('provider_registrations').insert([data]);
 }
 
 // ─── Sample data (fallback when Supabase is not configured) ─────────────────
