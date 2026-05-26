@@ -305,9 +305,17 @@ function AiRecommendPanel(props) {
           { style: { display:'flex', flexDirection:'column', gap:12, marginBottom:20 } },
           (result.recommendations || []).map(function(rec, i) {
             var f = rec.facility;
+            var naverQuery = encodeURIComponent((f && f.address) ? f.address : rec.name);
+            var naverUrl = 'https://map.naver.com/v5/search/' + naverQuery;
             return React.createElement(
               'div',
-              { key: i, style: { padding:16, borderRadius:14, border:'1.5px solid #eee', background: i === 0 ? '#FFFAF7' : '#fff' } },
+              {
+                key: i,
+                onClick: function() { window.open(naverUrl, '_blank', 'noopener'); },
+                style: { padding:16, borderRadius:14, border:'1.5px solid #eee', background: i === 0 ? '#FFFAF7' : '#fff', cursor:'pointer', transition:'box-shadow 0.15s' },
+                onMouseEnter: function(e) { e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)'; e.currentTarget.style.borderColor = '#F37338'; },
+                onMouseLeave: function(e) { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.borderColor = '#eee'; },
+              },
               React.createElement(
                 'div',
                 { style: { display:'flex', alignItems:'center', gap:8, marginBottom:8 } },
@@ -328,7 +336,10 @@ function AiRecommendPanel(props) {
                 f.voucher && React.createElement('span', {
                   style: { display:'inline-block', marginTop:6, background:'#E8F4FD', color:'#1A5276', borderRadius:999, padding:'2px 8px', fontSize:11, fontWeight:700 }
                 }, '바우처 가능')
-              )
+              ),
+              React.createElement('div', {
+                style: { marginTop:10, marginLeft:32, fontSize:11, color:'#F37338', fontWeight:600 }
+              }, '🗺 클릭하면 네이버 지도로 이동')
             );
           })
         ),
@@ -517,7 +528,7 @@ function MapPreview(props) {
     // Supabase / 샘플
     window.IeumAPI.fetchFacilities(query ? { search: query } : {})
       .then(function(result) {
-        var supaList = (!result.error && result.data) ? result.data : (window.SAMPLE_FACILITIES || []);
+        var supaList = (!result.error && result.data) ? result.data : [];
 
         // 중복 제거 후 합치기
         var seen = new Set();
@@ -537,7 +548,7 @@ function MapPreview(props) {
         setMapFacilities(all);
       })
       .catch(function() {
-        setMapFacilities(window.SAMPLE_FACILITIES || []);
+        setMapFacilities(window.HWPC_FACILITIES || []);
       })
       .finally(function() {
         setDataLoading(false);
@@ -605,7 +616,8 @@ function MapPreview(props) {
   /* ── 마커 업데이트 ─────────────────────────────────────── */
   React.useEffect(function() {
     if (!mapInitialized || !mapObjRef.current) return;
-    var N = window.naver.maps;
+    var N = window.naver && window.naver.maps;
+    if (!N) return;
     var map = mapObjRef.current;
 
     markersRef.current.forEach(function(m) { try { m.setMap(null); } catch(e) {} });
@@ -617,23 +629,28 @@ function MapPreview(props) {
 
     valid.forEach(function(f, idx) {
       var isHwpc = f.id && String(f.id).startsWith('hwpc_');
+      var isCentroid = f.geocode_source === 'region_centroid';
       var color = isHwpc ? '#1B7A4B'
         : f.badge_type === 'public'    ? '#2A6FDB'
         : f.badge_type === 'business'  ? '#CF4500'
         : '#F37338';
+
+      // region_centroid 마커: 테두리를 점선 스타일(오렌지), 투명도 60%로 구분
+      var markerStyle =
+        'background:' + color + ';color:#fff;border-radius:50%;' +
+        'width:30px;height:30px;display:flex;align-items:center;justify-content:center;' +
+        'font-size:10px;font-weight:800;cursor:pointer;' +
+        'font-family:Pretendard,-apple-system,sans-serif;' +
+        (isCentroid
+          ? 'opacity:0.55;border:2.5px dashed #F59E0B;box-shadow:0 2px 6px rgba(0,0,0,0.2);'
+          : 'border:2.5px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.3);');
 
       var marker = new N.Marker({
         position: new N.LatLng(f.lat, f.lng),
         map: map,
         title: f.name,
         icon: {
-          content:
-            '<div style="background:' + color + ';color:#fff;border-radius:50%;' +
-            'width:30px;height:30px;display:flex;align-items:center;justify-content:center;' +
-            'font-size:10px;font-weight:800;border:2.5px solid #fff;' +
-            'box-shadow:0 2px 10px rgba(0,0,0,0.3);cursor:pointer;' +
-            'font-family:Pretendard,-apple-system,sans-serif;">' +
-            (idx + 1) + '</div>',
+          content: '<div style="' + markerStyle + '">' + (idx + 1) + '</div>',
           anchor: new N.Point(15, 15),
         },
       });
@@ -643,17 +660,27 @@ function MapPreview(props) {
         : f.badge_type === 'business' ? '사업자 인증'
         : '지도사 인증';
 
+      var naverMapUrl = 'https://map.naver.com/v5/search/' + encodeURIComponent(f.address || f.name);
+
       var infoHtml =
-        '<div style="padding:12px 16px;min-width:200px;max-width:260px;' +
+        '<div style="padding:12px 16px;min-width:210px;max-width:270px;' +
         'font-family:Pretendard,-apple-system,sans-serif;">' +
         '<div style="font-size:13.5px;font-weight:700;color:#1A1A18;margin-bottom:4px">' + f.name + '</div>' +
-        '<div style="font-size:11.5px;color:' + color + ';font-weight:600;margin-bottom:4px">' + typeLabel + '</div>' +
+        '<div style="font-size:11.5px;color:' + color + ';font-weight:600;margin-bottom:6px">' + typeLabel + '</div>' +
+        (isCentroid ? '<div style="font-size:10.5px;color:#B45309;background:#FEF3C7;border-radius:6px;padding:2px 6px;margin-bottom:6px">⚠ 정확한 위치 미확인 (시·도 중심)</div>' : '') +
         (f.address ? '<div style="font-size:11.5px;color:#555;margin-top:3px">' + f.address + '</div>' : '') +
-        (f.phone   ? '<div style="font-size:11px;color:#888;margin-top:2px">☎ ' + f.phone + '</div>' : '') +
+        (f.phone   ? '<div style="font-size:11px;color:#888;margin-top:4px">☎ ' + f.phone + '</div>' : '') +
         (f.distKm != null && window.GeoUtils
           ? '<div style="font-size:11px;color:#888;margin-top:3px">📍 ' + window.GeoUtils.formatDistance(f.distKm) + '</div>'
           : '') +
-        (f.voucher ? '<span style="display:inline-block;margin-top:6px;background:#E8F4FD;color:#1A5276;border-radius:999px;padding:2px 8px;font-size:10px;font-weight:700">바우처</span>' : '') +
+        '<div style="margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">' +
+        (f.voucher ? '<span style="background:#E8F4FD;color:#1A5276;border-radius:999px;padding:2px 8px;font-size:10px;font-weight:700">바우처</span>' : '') +
+        '<a href="' + naverMapUrl + '" target="_blank" rel="noopener" ' +
+        'style="display:inline-flex;align-items:center;gap:3px;background:#03C75A;color:#fff;' +
+        'border-radius:999px;padding:3px 10px;font-size:10.5px;font-weight:700;text-decoration:none;' +
+        'white-space:nowrap;">' +
+        '🗺 네이버 지도</a>' +
+        '</div>' +
         '</div>';
 
       var iw = new N.InfoWindow({

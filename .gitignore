@@ -18,3 +18,5 @@ Thumbs.db
 
 # Node (혹시 패키지 추가 시)
 node_modules/
+
+.vercel

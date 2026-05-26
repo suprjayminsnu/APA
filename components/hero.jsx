@@ -201,11 +201,11 @@ function Hero({ variant, onSearch, userLocation, onLocationDetected }) {
           <div className="hero-copy">
             <span className="eyebrow">
               <span className="ko">우리 동네 특수체육</span>
-              <span className="en">/ Special sports, connected</span>
+              <span className="en">/ Adaptive Sports, connected</span>
             </span>
             <h1 style={{ marginTop: 20 }}>
               내게 맞는 운동을,<br/>
-              <span className="accent">걸어서 5분</span> 거리에서.
+              <span className="accent">가장 가까운</span> 거리에서.
             </h1>
             <p className="lead">
               등록 장애인 263만 명을 위한 통합 검색 플랫폼. 시·군·구 단위로

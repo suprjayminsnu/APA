@@ -98,16 +98,16 @@ function filterByRadius(facilities, userLat, userLng, radiusKm) {
 }
 
 // ─── 자동 반경 확대 (PRD 농어촌 정책) ─────────────────────
-// 결과가 없으면 5km → 10km → 시·도 전체(100km) 순서로 확대
+// 결과가 없으면 10km → 20km → 30km → 전국 순서로 확대
 function getResultsWithAutoExpand(facilities, userLat, userLng) {
-  const radii = [5, 10, 30, 100];
+  const radii = [10, 20, 30];
   for (const r of radii) {
     const results = filterByRadius(facilities, userLat, userLng, r);
-    if (results.length >= 3) {
+    if (results.length >= 1) {
       return { results: sortFacilitiesByDistance(results, userLat, userLng), radius: r };
     }
   }
-  // 전체 반환
+  // 전국 반환 (30km 내 시설 없는 경우)
   return {
     results: sortFacilitiesByDistance(facilities, userLat, userLng),
     radius: null,

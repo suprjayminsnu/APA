@@ -199,7 +199,7 @@ function Neighborhoods({ dense, searchFilters, onDetail }) {
 
   const userLocation = searchFilters?.userLocation;
   const [active, setActive] = React.useState('내 근처');
-  const [facilities, setFacilities] = React.useState(window.SAMPLE_FACILITIES || []);
+  const [facilities, setFacilities] = React.useState(window.HWPC_FACILITIES || []);
   const [loading, setLoading] = React.useState(false);
   const [gpsRadius, setGpsRadius] = React.useState(null); // 자동 확대 반경
 
@@ -246,7 +246,12 @@ function Neighborhoods({ dense, searchFilters, onDetail }) {
         setLoading(true);
         const district = (active === '내 근처' || active.startsWith('+')) ? undefined : active;
         const { data, error } = await window.IeumAPI.fetchFacilities({ district });
-        if (data && !error) setFacilities(data);
+        // Supabase 데이터와 HWPC 73개를 병합 (중복 id 제거)
+        const hwpc = window.HWPC_FACILITIES || [];
+        const supaData = (!error && data && data.length > 0) ? data : [];
+        const seen = new Set(supaData.map(f => f.id));
+        const merged = [...supaData, ...hwpc.filter(f => !seen.has(f.id))];
+        setFacilities(merged);
         setLoading(false);
       }
     }
@@ -267,7 +272,7 @@ function Neighborhoods({ dense, searchFilters, onDetail }) {
         <h2 style={{ marginTop:18, maxWidth:700 }}>
           {active === '내 근처' && userLocation
             ? <>{userLocation.displayLabel}의 특수체육 시설</>
-            : '오늘 우리 동네에 새로 열린 프로그램.'}
+            : '우리 동네 시설'}
         </h2>
         <p style={{ marginTop:14, fontSize:17, color:'var(--ink-charcoal)', maxWidth:580, lineHeight:1.55 }}>
           {active === '내 근처' && gpsRadius
@@ -334,7 +339,7 @@ function Neighborhoods({ dense, searchFilters, onDetail }) {
         ) : (
           <div className="facility-grid"
             style={dense ? { gridTemplateColumns:'repeat(4, 1fr)' } : undefined}>
-            {districtFiltered.map(f => (
+            {(active === '내 근처' && !userLocation ? districtFiltered.slice(0, 9) : districtFiltered).map(f => (
               <FacilityCard key={f.id} f={f} onDetail={onDetail}/>
             ))}
           </div>

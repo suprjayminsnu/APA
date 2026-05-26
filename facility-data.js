@@ -1,6 +1,9 @@
 /* ============================================================
    대한장애인체육회 장애인전용체육시설 데이터 (73개)
-   좌표: OpenStreetMap Nominatim 사전 지오코딩
+   좌표: 네이버 Geocoding API 사전 지오코딩 (2026-05-26 갱신)
+   전체 73개 / naver_full 68개 / naver_partial 1개
+          / naver_name 0개 / naver_district 4개
+          / region_centroid 0개 / 기존좌표유지 0개
    ============================================================ */
 window.HWPC_FACILITIES = [
   {
@@ -8,47 +11,49 @@ window.HWPC_FACILITIES = [
     "name": "SRC 서울센터",
     "region": "서울",
     "district": "관악구",
-    "address": "서울 특별시 관악구 보라매로 44",
+    "address": "서울특별시 관악구 보라매로 44",
     "phone": "02-871-3636",
     "website": "seoulsrc.com",
     "org": "사복) SRC",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 37.4931756,
+    "lng": 126.9274006,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
+      "시각",
+      "지체",
       "기타"
-    ]
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_2",
     "name": "서울곰두리체육센터",
     "region": "서울",
     "district": "송파구",
-    "address": "서울 시 송파구 동남로 271",
+    "address": "서울시 송파구 동남로 271",
     "phone": "02-404-6240",
     "website": "www.sgsc.or.kr",
     "org": "사)한국시각장애인연합회",
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": 37.5123342,
-    "lng": 127.1404204,
+    "lat": 37.5004957,
+    "lng": 127.1354641,
     "disability_types": [
-      "지체",
       "뇌병변",
-      "시각",
       "청각",
-      "지적",
-      "자폐성"
-    ]
+      "지적"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_3",
@@ -61,15 +66,22 @@ window.HWPC_FACILITIES = [
     "org": "사복)엔젤스헤이븐(은평천사원)",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": 37.6053281,
-    "lng": 126.9070431,
+    "badge_type": "instructor",
+    "lat": 37.6056099,
+    "lng": 126.9067178,
     "disability_types": [
-      "지체",
       "뇌병변",
+      "시각",
+      "지체",
+      "청각",
       "지적",
-      "자폐성"
-    ]
+      "자폐성",
+      "기타"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_4",
@@ -83,63 +95,72 @@ window.HWPC_FACILITIES = [
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 37.6445781,
+    "lng": 127.0728729,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "시각",
+      "뇌병변",
+      "지적",
+      "청각",
+      "지체"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_5",
     "name": "마포푸르메스포츠센터",
     "region": "서울",
     "district": "마포구",
-    "address": "서울특별시 마포 구 월드컵북로 494",
+    "address": "서울특별시 마포구 월드컵북로 494",
     "phone": "02-6070-9270",
     "website": "www.purmesports.or.kr",
     "org": "재단법인 푸르메",
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 37.5846589,
+    "lng": 126.8805264,
     "disability_types": [
-      "지체",
-      "뇌병변",
       "시각",
-      "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "뇌병변",
+      "지적"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_6",
     "name": "서울수중재활센터",
     "region": "서울",
     "district": "강동구",
-    "address": "서울 특별시 강동구 고덕로 201",
+    "address": "서울특별시 강동구 고덕로 201",
     "phone": "02-440-5700",
     "website": "www.seoulreports.or.kr",
     "org": "시립서울장애인종합복지관",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": 37.5550222,
-    "lng": 127.1486968,
+    "badge_type": "business",
+    "lat": 37.5558562,
+    "lng": 127.1482802,
     "disability_types": [
-      "지체",
-      "뇌병변",
+      "청각",
       "지적",
       "자폐성",
-      "청각"
-    ]
+      "뇌병변",
+      "지체",
+      "시각",
+      "기타"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": true
   },
   {
     "id": "hwpc_7",
@@ -153,17 +174,16 @@ window.HWPC_FACILITIES = [
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 37.5693631,
+    "lng": 126.8487793,
     "disability_types": [
       "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "뇌병변"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_8",
@@ -177,17 +197,19 @@ window.HWPC_FACILITIES = [
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 37.5510878,
+    "lng": 127.0976313,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "지체",
+      "청각",
+      "뇌병변",
+      "시각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_9",
@@ -200,66 +222,67 @@ window.HWPC_FACILITIES = [
     "org": "사)사하스포츠클럽",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 35.1094432,
+    "lng": 128.9469,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "지체"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_10",
     "name": "부산곰두리스포츠센터",
     "region": "부산",
     "district": "연제구",
-    "address": "부산 광역시 연제구 화지로 109",
+    "address": "부산광역시 연제구 화지로 109",
     "phone": "051-503-6363",
     "website": "www.gomduri.org",
     "org": "사복)양지동산",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 35.1852386,
+    "lng": 129.0657322,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "시각",
+      "지체",
+      "뇌병변"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_11",
     "name": "부산한마음스포츠센터",
     "region": "부산",
     "district": "해운대구",
-    "address": "부산 광역시 해운대구 세실로 175",
+    "address": "부산광역시 해운대구 세실로 175",
     "phone": "051-709-0700",
     "website": "hmsports.bisco.or.kr",
     "org": "부산시설공단",
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 35.1803978,
+    "lng": 129.1766873,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "뇌병변",
+      "지체",
+      "시각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_12",
@@ -272,18 +295,22 @@ window.HWPC_FACILITIES = [
     "org": "사)국제라이온스 356-A",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 35.858165,
+    "lng": 128.630625,
     "disability_types": [
-      "지체",
       "뇌병변",
+      "자폐성",
       "시각",
+      "지체",
       "청각",
       "지적",
-      "자폐성",
       "기타"
-    ]
+    ],
+    "geocode_source": "naver_district",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_13",
@@ -296,18 +323,19 @@ window.HWPC_FACILITIES = [
     "org": "사복)전석복지재단",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 35.829867,
+    "lng": 128.532737,
     "disability_types": [
-      "지체",
-      "뇌병변",
       "시각",
-      "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "뇌병변",
+      "지체",
+      "청각"
+    ],
+    "geocode_source": "naver_district",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_14",
@@ -320,18 +348,17 @@ window.HWPC_FACILITIES = [
     "org": "대구광역시장애인체육회",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 35.858165,
+    "lng": 128.630625,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "청각"
+    ],
+    "geocode_source": "naver_partial",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_15",
@@ -344,18 +371,21 @@ window.HWPC_FACILITIES = [
     "org": "인천광역시장애인체육회",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 37.4124316,
+    "lng": 126.659467,
     "disability_types": [
-      "지체",
       "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "청각",
+      "시각",
+      "지체",
+      "지적"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_16",
@@ -368,18 +398,18 @@ window.HWPC_FACILITIES = [
     "org": "인천광역시장애인체육회",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 37.4309078,
+    "lng": 126.7018293,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "뇌병변",
+      "시각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": true
   },
   {
     "id": "hwpc_17",
@@ -392,17 +422,21 @@ window.HWPC_FACILITIES = [
     "org": "재단법인 광주복지재단",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": 35.1857085,
-    "lng": 126.8675028,
+    "badge_type": "business",
+    "lat": 35.1852509,
+    "lng": 126.867887,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
       "청각",
       "지적",
-      "자폐성"
-    ]
+      "자폐성",
+      "지체",
+      "정신",
+      "기타"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_18",
@@ -415,18 +449,18 @@ window.HWPC_FACILITIES = [
     "org": "광주광역시장애인체육회",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 35.1368102,
+    "lng": 126.8790595,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
       "자폐성",
-      "기타"
-    ]
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_19",
@@ -439,18 +473,18 @@ window.HWPC_FACILITIES = [
     "org": "대전광역시 시설관리공단",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 36.3573475,
+    "lng": 127.3045785,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "지체",
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_20",
@@ -463,18 +497,19 @@ window.HWPC_FACILITIES = [
     "org": "사)대전시각장애인연합회",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 36.3038098,
+    "lng": 127.3826733,
     "disability_types": [
       "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "뇌병변",
+      "청각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": true
   },
   {
     "id": "hwpc_21",
@@ -487,18 +522,19 @@ window.HWPC_FACILITIES = [
     "org": "사복)미동",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 36.355504,
+    "lng": 127.383844,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "지적",
+      "청각",
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_22",
@@ -512,17 +548,19 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 36.362322,
+    "lng": 127.356268,
     "disability_types": [
-      "지체",
       "뇌병변",
-      "시각",
-      "청각",
+      "지체",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "시각",
+      "자폐성"
+    ],
+    "geocode_source": "naver_district",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": true
   },
   {
     "id": "hwpc_23",
@@ -535,42 +573,42 @@ window.HWPC_FACILITIES = [
     "org": "사)한국지체장애인협회",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 36.3814356,
+    "lng": 127.3233641,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "지체",
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_24",
     "name": "대전광역시립 체육재활원",
     "region": "대전",
     "district": "대덕구",
-    "address": "대전광역 시 대덕구 대화로 10",
+    "address": "대전광역시 대덕구 대화로 10",
     "phone": "042-631-9889",
     "website": "www.djsrc.or.kr",
     "org": "사)대전장애인단체총연합회",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 36.3682408,
+    "lng": 127.4190858,
     "disability_types": [
-      "지체",
       "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_25",
@@ -583,18 +621,20 @@ window.HWPC_FACILITIES = [
     "org": "카톨릭사회복지회",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 36.387551,
+    "lng": 127.4220556,
     "disability_types": [
-      "지체",
       "뇌병변",
       "시각",
       "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "지체",
+      "지적"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_26",
@@ -607,16 +647,21 @@ window.HWPC_FACILITIES = [
     "org": "사)한국지체장애인협회",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": 36.268292,
-    "lng": 127.471774,
+    "badge_type": "business",
+    "lat": 36.2681199,
+    "lng": 127.4722505,
     "disability_types": [
       "지체",
-      "뇌병변",
-      "지적",
       "자폐성",
-      "정신"
-    ]
+      "지적",
+      "청각",
+      "시각",
+      "뇌병변"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_27",
@@ -630,17 +675,19 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 35.5460789,
+    "lng": 129.3368883,
     "disability_types": [
       "지체",
       "뇌병변",
-      "시각",
       "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "지적"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_28",
@@ -653,16 +700,20 @@ window.HWPC_FACILITIES = [
     "org": "사)울산광역시장애인총연합회",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": 35.5644386,
-    "lng": 129.315468,
+    "badge_type": "instructor",
+    "lat": 35.5644481,
+    "lng": 129.3155379,
     "disability_types": [
-      "지체",
-      "뇌병변",
+      "시각",
       "청각",
       "지적",
-      "시각"
-    ]
+      "지체",
+      "자폐성"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_29",
@@ -676,17 +727,21 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 37.4789538,
+    "lng": 126.8464263,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "지적",
+      "지체",
+      "시각",
+      "뇌병변",
+      "청각",
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_30",
@@ -700,16 +755,20 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": 37.6948536,
-    "lng": 126.7756682,
+    "lat": 37.6962678,
+    "lng": 126.7709999,
     "disability_types": [
-      "지체",
       "뇌병변",
-      "시각",
-      "청각",
+      "지체",
       "지적",
+      "청각",
+      "시각",
       "자폐성"
-    ]
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_31",
@@ -723,15 +782,17 @@ window.HWPC_FACILITIES = [
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": 37.7034328,
-    "lng": 126.765131,
+    "lat": 37.7032101,
+    "lng": 126.7645591,
     "disability_types": [
-      "지체",
-      "뇌병변",
       "지적",
-      "자폐성",
-      "청각"
-    ]
+      "뇌병변",
+      "기타"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_32",
@@ -744,18 +805,17 @@ window.HWPC_FACILITIES = [
     "org": "재)부산성베네딕도수녀회",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 37.3367828,
+    "lng": 127.2936739,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
       "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "지적"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_33",
@@ -769,14 +829,18 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": 37.2830664,
-    "lng": 126.8412947,
+    "lat": 37.2834889,
+    "lng": 126.8402396,
     "disability_types": [
-      "지체",
-      "청각",
-      "지적",
-      "뇌병변"
-    ]
+      "뇌병변",
+      "시각",
+      "자폐성",
+      "청각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_34",
@@ -789,18 +853,19 @@ window.HWPC_FACILITIES = [
     "org": "사복)수원중앙복지재단",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 37.2955467,
+    "lng": 127.0360454,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
       "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "시각",
+      "지체",
+      "자폐성"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_35",
@@ -814,17 +879,17 @@ window.HWPC_FACILITIES = [
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 37.4187426,
+    "lng": 127.2873314,
     "disability_types": [
       "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_36",
@@ -837,18 +902,20 @@ window.HWPC_FACILITIES = [
     "org": "보훈공단",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 37.2975823,
+    "lng": 127.0246089,
     "disability_types": [
       "지체",
       "뇌병변",
       "시각",
-      "청각",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_37",
@@ -862,17 +929,18 @@ window.HWPC_FACILITIES = [
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 37.4082763,
+    "lng": 127.1441876,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
       "자폐성",
-      "기타"
-    ]
+      "지체",
+      "시각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_38",
@@ -885,88 +953,98 @@ window.HWPC_FACILITIES = [
     "org": "사복) 돕는사람들",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 37.3849761,
+    "lng": 126.9269738,
     "disability_types": [
-      "지체",
       "뇌병변",
       "시각",
-      "청각",
-      "지적",
-      "자폐성",
+      "정신",
       "기타"
-    ]
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_39",
     "name": "시흥어울림국민체육센터",
     "region": "경기",
     "district": "시흥시",
-    "address": "경기도 시흥 시 정왕대로233",
+    "address": "경기도 시흥시 정왕대로233",
     "phone": "031-8084-0101",
     "website": "www.shsi.or.kr",
     "org": "시흥도시공사",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 37.3449671,
+    "lng": 126.7385084,
     "disability_types": [
-      "지체",
       "뇌병변",
       "시각",
-      "청각",
       "지적",
+      "청각",
+      "지체",
       "자폐성",
-      "기타"
-    ]
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_40",
     "name": "원주드림체육관",
     "region": "강원",
     "district": "원주시",
-    "address": "강원특별자치도 원주 시 현충로 53",
+    "address": "강원특별자치도 원주시 현충로 53",
     "phone": "033-737-4666",
     "website": "www.wonju.go.krsports",
     "org": "원주시청",
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": 37.3606147,
-    "lng": 127.9536282,
+    "lat": 37.3603959,
+    "lng": 127.9532676,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "청각",
       "지적",
-      "시각"
-    ]
+      "청각",
+      "시각",
+      "지체",
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_41",
     "name": "춘천장애인스포츠센터",
     "region": "강원",
     "district": "춘천시",
-    "address": "강원특별자치도 춘천 시 평화로 26",
+    "address": "강원특별자치도 춘천시 평화로 26",
     "phone": "033-240-1751",
     "website": "www.cuc.or.kr",
     "org": "춘천도시공사",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 37.8855094,
+    "lng": 127.7215926,
     "disability_types": [
       "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "시각",
+      "지적"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_42",
@@ -980,17 +1058,19 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 36.9591457,
+    "lng": 127.9114263,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
+      "청각",
+      "지체",
       "자폐성",
-      "기타"
-    ]
+      "시각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_43",
@@ -1004,17 +1084,18 @@ window.HWPC_FACILITIES = [
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 36.6693164,
+    "lng": 127.4648822,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
-      "자폐성",
+      "지체",
+      "시각",
       "기타"
-    ]
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_44",
@@ -1028,17 +1109,17 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 37.1305633,
+    "lng": 128.2299857,
     "disability_types": [
       "지체",
-      "뇌병변",
       "시각",
-      "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "지적"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": true
   },
   {
     "id": "hwpc_45",
@@ -1052,41 +1133,41 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 36.634745,
+    "lng": 127.488601,
     "disability_types": [
-      "지체",
-      "뇌병변",
       "시각",
-      "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "뇌병변"
+    ],
+    "geocode_source": "naver_district",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_46",
     "name": "보은군장애인회관",
     "region": "충북",
     "district": "보은군",
-    "address": "충북 보은군 보은 읍 뱃들4길 11-10",
+    "address": "충북 보은군 보은읍 뱃들4길 11-10",
     "phone": "043-544-3512",
     "website": "",
     "org": "보은군장애인단체연합회",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 36.4883567,
+    "lng": 127.7239,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "청각",
+      "뇌병변",
+      "지체"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_47",
@@ -1099,18 +1180,18 @@ window.HWPC_FACILITIES = [
     "org": "사복)보령학사",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 36.3783653,
+    "lng": 126.5868874,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
       "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "지체",
+      "뇌병변"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_48",
@@ -1123,66 +1204,71 @@ window.HWPC_FACILITIES = [
     "org": "천안시장애인체육회",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 36.8158604,
+    "lng": 127.171918,
     "disability_types": [
-      "지체",
+      "자폐성",
       "뇌병변",
       "시각",
+      "지체",
       "청각",
-      "지적",
-      "자폐성",
       "기타"
-    ]
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_49",
     "name": "홍성군장애인스포츠센터",
     "region": "충남",
     "district": "홍성군",
-    "address": "충남 홍성군 홍성 읍 홍덕서로 78",
+    "address": "충남 홍성군 홍성읍 홍덕서로 78",
     "phone": "070-4401-1391",
     "website": "www.hscd.co.kr",
     "org": "홍성군장애인체육회",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 36.6066597,
+    "lng": 126.6438432,
     "disability_types": [
-      "지체",
       "뇌병변",
-      "시각",
+      "자폐성",
       "청각",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "시각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_50",
     "name": "아산장애인국민체육센터",
     "region": "충남",
     "district": "아산시",
-    "address": "충남 아산 시 곡교천로27",
+    "address": "충남 아산시 곡교천로27",
     "phone": "041-546-1513",
     "website": "www.asan.go.kr",
     "org": "아산시청",
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 36.7878686,
+    "lng": 126.9846214,
     "disability_types": [
       "지체",
       "뇌병변",
-      "시각",
-      "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "청각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_51",
@@ -1195,18 +1281,19 @@ window.HWPC_FACILITIES = [
     "org": "학교·사복)동암",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 35.81151,
+    "lng": 127.0919909,
     "disability_types": [
-      "지체",
-      "뇌병변",
       "시각",
-      "청각",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "청각",
+      "자폐성"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_52",
@@ -1219,18 +1306,18 @@ window.HWPC_FACILITIES = [
     "org": "정읍시",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 35.5773462,
+    "lng": 126.854078,
     "disability_types": [
       "지체",
-      "뇌병변",
       "시각",
-      "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_53",
@@ -1243,18 +1330,19 @@ window.HWPC_FACILITIES = [
     "org": "김제시장애인종합복지관",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 35.8050999,
+    "lng": 126.8712005,
     "disability_types": [
       "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "청각",
+      "뇌병변"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_54",
@@ -1267,18 +1355,22 @@ window.HWPC_FACILITIES = [
     "org": "군산시",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 35.948843,
+    "lng": 126.8166866,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
+      "지체",
+      "청각",
+      "시각",
       "자폐성",
-      "기타"
-    ]
+      "뇌병변",
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": true
   },
   {
     "id": "hwpc_55",
@@ -1292,17 +1384,20 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 35.8534313,
+    "lng": 127.1259822,
     "disability_types": [
-      "지체",
+      "지적",
       "뇌병변",
       "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "지체",
+      "청각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_56",
@@ -1315,18 +1410,17 @@ window.HWPC_FACILITIES = [
     "org": "사)조선대 사회복지회",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 35.0083147,
+    "lng": 126.6951161,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "시각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_57",
@@ -1339,65 +1433,68 @@ window.HWPC_FACILITIES = [
     "org": "여수시도시관리공단",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": 34.7618406,
-    "lng": 127.7217926,
+    "badge_type": "instructor",
+    "lat": 34.7616209,
+    "lng": 127.7274874,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
       "청각",
-      "지적",
-      "자폐성"
-    ]
+      "시각",
+      "뇌병변",
+      "지체"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_58",
     "name": "광양장애인국민체육센터",
     "region": "전남",
     "district": "광양시",
-    "address": "전남 광양 시 봉강면 매천로 695",
+    "address": "전남 광양시 봉강면 매천로 695",
     "phone": "061-762-9880",
     "website": "",
     "org": "광양시장애인체육회",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 34.9824091,
+    "lng": 127.5736874,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
       "자폐성",
-      "기타"
-    ]
+      "시각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_59",
     "name": "해남군다목적생활체육관",
     "region": "전남",
     "district": "해남군",
-    "address": "전라남도 해남군 해남 읍 해남 로 72",
+    "address": "전라남도 해남군 해남읍 해남 로 72",
     "phone": "061-535-8226",
     "website": "",
     "org": "해남군청",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 34.5690833,
+    "lng": 126.6208375,
     "disability_types": [
-      "지체",
-      "뇌병변",
       "시각",
+      "뇌병변",
       "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "자폐성"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_60",
@@ -1410,18 +1507,20 @@ window.HWPC_FACILITIES = [
     "org": "사복)천주교안동교구사회복지회",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 36.4422849,
+    "lng": 128.154912,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
       "청각",
-      "지적",
+      "뇌병변",
       "자폐성",
-      "기타"
-    ]
+      "시각",
+      "지체"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_61",
@@ -1434,18 +1533,22 @@ window.HWPC_FACILITIES = [
     "org": "사복)대한불교조계종 불국사복지재단",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 35.8802071,
+    "lng": 129.2183125,
     "disability_types": [
+      "시각",
       "지체",
       "뇌병변",
-      "시각",
+      "자폐성",
       "청각",
       "지적",
-      "자폐성",
       "기타"
-    ]
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_62",
@@ -1459,17 +1562,16 @@ window.HWPC_FACILITIES = [
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 36.1060236,
+    "lng": 128.3305373,
     "disability_types": [
-      "지체",
       "뇌병변",
-      "시각",
-      "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "청각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_63",
@@ -1483,17 +1585,19 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 36.6571154,
+    "lng": 128.6818,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
       "청각",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "뇌병변",
+      "시각",
+      "자폐성"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": true
   },
   {
     "id": "hwpc_64",
@@ -1507,17 +1611,17 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 36.5944296,
+    "lng": 128.1855802,
     "disability_types": [
       "지체",
-      "뇌병변",
-      "시각",
       "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_65",
@@ -1530,18 +1634,21 @@ window.HWPC_FACILITIES = [
     "org": "사복)범숙",
     "voucher": true,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "instructor",
+    "lat": 35.250421,
+    "lng": 128.6795397,
     "disability_types": [
+      "청각",
       "지체",
       "뇌병변",
-      "시각",
-      "청각",
       "지적",
       "자폐성",
-      "기타"
-    ]
+      "시각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": false
   },
   {
     "id": "hwpc_66",
@@ -1555,16 +1662,20 @@ window.HWPC_FACILITIES = [
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": 35.2529725,
-    "lng": 128.6368667,
+    "lat": 35.2530459,
+    "lng": 128.6370113,
     "disability_types": [
-      "지체",
-      "뇌병변",
+      "지적",
       "시각",
       "청각",
-      "지적",
-      "자폐성"
-    ]
+      "자폐성",
+      "뇌병변",
+      "지체"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": false,
+    "is_free": true
   },
   {
     "id": "hwpc_67",
@@ -1578,17 +1689,19 @@ window.HWPC_FACILITIES = [
     "voucher": true,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 34.9968348,
+    "lng": 128.0605048,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
       "청각",
+      "시각",
+      "뇌병변",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "자폐성"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": "2025-01-01",
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_68",
@@ -1602,17 +1715,17 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 33.4865053,
+    "lng": 126.4368679,
     "disability_types": [
-      "지체",
-      "뇌병변",
       "시각",
       "청각",
-      "지적",
-      "자폐성",
-      "기타"
-    ]
+      "지체"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_69",
@@ -1626,89 +1739,92 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 36.4946651,
+    "lng": 127.3192565,
     "disability_types": [
-      "지체",
-      "뇌병변",
       "시각",
-      "청각",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "지체",
+      "청각",
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_70",
     "name": "광주북구반다비체육센터",
     "region": "광주",
     "district": "북구",
-    "address": "광주 광역시 북구 필문대로 55",
+    "address": "광주광역시 북구 필문대로 55",
     "phone": "062-524-0731",
     "website": "www.gbfmc.or.kr",
     "org": "광주북구시설관리공단",
     "voucher": true,
     "bandabi": true,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 35.1647158,
+    "lng": 126.9269526,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "뇌병변",
+      "지체"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_71",
     "name": "홍천군장애인체육센터",
     "region": "강원",
     "district": "홍천군",
-    "address": "강원특별자치도 홍천군 홍천 읍 홍천 로 645",
+    "address": "강원특별자치도 홍천군 홍천읍 홍천 로 645",
     "phone": "033-433-7976",
     "website": "",
     "org": "홍천군장애인체육회",
     "voucher": false,
     "bandabi": false,
-    "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "badge_type": "business",
+    "lat": 37.7064278,
+    "lng": 127.9071422,
     "disability_types": [
+      "청각",
       "지체",
       "뇌병변",
-      "시각",
-      "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "시각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": true
   },
   {
     "id": "hwpc_72",
     "name": "익산반다비체육센터",
     "region": "전북",
     "district": "익산시",
-    "address": "전북특별자치도 익산 시 무왕로 1397",
+    "address": "전북특별자치도 익산시 무왕로 1397",
     "phone": "063-859-5872",
     "website": "",
     "org": "추후 선정 예정",
     "voucher": false,
     "bandabi": false,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 35.9680345,
+    "lng": 127.0089392,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
-      "청각",
       "지적",
-      "자폐성",
-      "기타"
-    ]
+      "청각"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": true,
+    "is_free": false
   },
   {
     "id": "hwpc_73",
@@ -1722,16 +1838,18 @@ window.HWPC_FACILITIES = [
     "voucher": false,
     "bandabi": true,
     "badge_type": "public",
-    "lat": null,
-    "lng": null,
+    "lat": 35.3230094,
+    "lng": 129.0028701,
     "disability_types": [
-      "지체",
-      "뇌병변",
-      "시각",
       "청각",
-      "지적",
       "자폐성",
-      "기타"
-    ]
+      "뇌병변",
+      "지적",
+      "정신"
+    ],
+    "geocode_source": "naver_full",
+    "verified_at": null,
+    "has_weekend": false,
+    "is_free": false
   }
 ];

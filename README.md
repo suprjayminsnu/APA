@@ -74,6 +74,28 @@ create policy "본인 신청만 조회" on provider_registrations for select usi
 create policy "신청 등록" on provider_registrations for insert with check (true);
 ```
 
+## 시설 좌표 갱신하는 법
+
+시설 주소가 추가·변경되거나 좌표가 없는 시설이 생기면 아래 절차로 일괄 지오코딩합니다.
+
+1. `.env.local` 파일에 네이버 클라우드 플랫폼 API 키 설정:
+   ```
+   NAVER_CLIENT_ID=여기에_클라이언트ID
+   NAVER_CLIENT_SECRET=여기에_클라이언트_시크릿
+   ```
+2. 스크립트 실행:
+   ```bash
+   npm run geocode
+   ```
+3. 변경된 `facility-data.js`를 커밋 후 Vercel에 푸시하면 자동 배포:
+   ```bash
+   git add facility-data.js
+   git commit -m "chore: 시설 좌표 갱신"
+   git push
+   ```
+
+> **참고**: `geocode_source === "region_centroid"` 인 시설은 정확한 도로명 주소를 못 찾아 시·도 중심점으로 표시된 것입니다. 지도에서 반투명·점선 마커로 구분되므로 수동 확인 후 `facility-data.js`에서 직접 좌표를 수정하세요.
+
 ## 네이버 지도 API 연결
 
 1. [Naver Cloud Platform](https://www.ncloud.com)에서 API 키 발급

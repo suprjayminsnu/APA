@@ -1,0 +1,8 @@
+{
+  "name": "ieum-platform",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "geocode": "node scripts/geocode-facilities.mjs"
+  }
+}
