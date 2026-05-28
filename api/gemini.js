@@ -31,7 +31,7 @@ export default async function handler(req, res) {
   // 거리 정보가 있는 시설만, 없으면 전체 (최대 30개)
   const candidates = facilities
     .filter(f => f.address)
-    .slice(0, 30);
+    .slice(0, 10);
 
   const facilityList = candidates.map((f, i) =>
     `${i + 1}. ${f.name} (${f.region} ${f.district}) — 주소: ${f.address}` +
@@ -78,7 +78,7 @@ ${facilityList}
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.3,
-            maxOutputTokens: 1024,
+            maxOutputTokens: 512,
           },
         }),
       }
