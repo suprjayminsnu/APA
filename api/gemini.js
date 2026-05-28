@@ -28,7 +28,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'facilities 데이터가 필요합니다.' });
   }
 
-  // 거리 정보가 있는 시설만, 없으면 전체 (최대 30개)
   const candidates = facilities
     .filter(f => f.address)
     .slice(0, 10);
@@ -97,17 +96,20 @@ ${facilityList}
     const geminiData = await geminiRes.json();
     const rawText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    // JSON 파싱 (마크다운 코드블록 제거)
-    const jsonText = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    // JSON 파싱: 마크다운 제거 후 { } 범위 추출
+    let jsonText = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const jsonStart = jsonText.indexOf('{');
+    const jsonEnd = jsonText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1) jsonText = jsonText.slice(jsonStart, jsonEnd + 1);
+
     let parsed;
     try {
       parsed = JSON.parse(jsonText);
     } catch (e) {
-      // 파싱 실패 시 원문 반환
+      console.error('[Gemini] JSON 파싱 실패, 원문:', rawText.slice(0, 300));
       return res.status(200).json({ raw: rawText, parseError: true });
     }
 
-    // facilityIndex로 실제 시설 데이터 연결
     if (parsed.recommendations) {
       parsed.recommendations = parsed.recommendations.map(r => {
         const idx = (r.facilityIndex || 1) - 1;
