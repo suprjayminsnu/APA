@@ -72,20 +72,35 @@ ${facilityList}
     generationConfig: { temperature: 0.3, maxOutputTokens: 512 },
   });
 
-  async function callGemini(attempt) {
+  const MODELS = [
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-8b',
+    'gemini-2.0-flash-lite',
+  ];
+
+  async function callGemini(modelIndex, attempt) {
+    const model = MODELS[modelIndex];
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: requestBody }
     );
-    if (geminiRes.status === 429 && attempt < 3) {
-      await new Promise(r => setTimeout(r, attempt * 1000));
-      return callGemini(attempt + 1);
+    if (geminiRes.status === 429) {
+      // 같은 모델 재시도 (최대 2회, 지수 백오프)
+      if (attempt < 2) {
+        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 2000));
+        return callGemini(modelIndex, attempt + 1);
+      }
+      // 다음 모델로 폴백
+      if (modelIndex + 1 < MODELS.length) {
+        console.warn(`[Gemini] ${model} 429 — ${MODELS[modelIndex + 1]}로 폴백`);
+        return callGemini(modelIndex + 1, 1);
+      }
     }
     return geminiRes;
   }
 
   try {
-    const geminiRes = await callGemini(1);
+    const geminiRes = await callGemini(0, 1);
 
     if (!geminiRes.ok) {
       const errText = await geminiRes.text();
