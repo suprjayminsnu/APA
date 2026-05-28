@@ -288,7 +288,7 @@ function AiRecommendPanel(props) {
           },
           loading
             ? [React.createElement('span', { key:'s', style: { animation:'spin 0.8s linear infinite', display:'inline-block', fontSize:18 } }, '⊙'), ' AI 분석 중…']
-            : [React.createElement('span', { key:'i', style: { fontSize:16 } }, '✨'), ' AI 시설 추천받기']
+            : [' AI 시설 추천받기']
         )
       ),
 
@@ -779,36 +779,6 @@ function MapPreview(props) {
           ),
           React.createElement('h2', { style:{ marginTop:18, maxWidth:700 } }, '지도에서 가까운 시설을 한눈에.')
         ),
-        React.createElement(
-          'div',
-          null,
-          React.createElement('p', { style:{ fontSize:15.5, lineHeight:1.65, color:'var(--ink-charcoal)', maxWidth:460 } },
-            userLocation
-              ? React.createElement(React.Fragment, null,
-                  React.createElement('strong', { style:{ color:'var(--badge-business)' } }, 'GPS 위치 감지 중'),
-                  ' — ' + (userLocation.short || '') + '을 중심으로 표시합니다.'
-                )
-              : '대한장애인체육회 등록 ' + hwpcCount + '개 전용시설을 지도에 표시합니다.'
-          ),
-          /* AI 추천 버튼 */
-          React.createElement(
-            'button',
-            {
-              onClick: function() { setShowAiPanel(true); },
-              style:{
-                marginTop:14, display:'inline-flex', alignItems:'center', gap:8,
-                padding:'11px 22px',
-                background:'linear-gradient(135deg,#CF4500,#F37338)',
-                color:'#fff', border:'none', borderRadius:999,
-                fontSize:14, fontWeight:800, cursor:'pointer',
-                fontFamily:'inherit',
-                boxShadow:'0 4px 20px rgba(207,69,0,0.35)',
-              }
-            },
-            React.createElement('span', { style:{ fontSize:16 } }, '✨'),
-            ' AI 시설 추천받기'
-          )
-        )
       ),
 
       /* GPS 배너 */
@@ -960,7 +930,6 @@ function MapPreview(props) {
               onClick: function() { setShowAiPanel(true); },
               style:{ width:'100%', marginTop:10, padding:'9px 0', background:'linear-gradient(135deg,#CF4500,#F37338)', color:'#fff', border:'none', borderRadius:10, fontSize:12.5, fontWeight:800, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', justifyContent:'center', gap:5 }
             },
-              React.createElement('span', null, '✨'),
               ' AI 시설 추천'
             ),
 
