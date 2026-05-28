@@ -69,7 +69,7 @@ ${facilityList}
 
   const requestBody = JSON.stringify({
     contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.3, maxOutputTokens: 512 },
+    generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
   });
 
   const MODELS = [
