@@ -43,7 +43,7 @@ function DisabilityTypes({ onTypeSelect }) {
               <span className="ko" style={{ color:'var(--canvas)' }}>장애 유형 필터</span>
               <span className="en" style={{ color:'rgba(255,255,255,0.55)' }}>/ Disability types</span>
             </span>
-            <h2 style={{ marginTop:18, maxWidth:720 }}>
+            <h2 style={{ marginTop:18, maxWidth:720, whiteSpace:'nowrap' }}>
               어떤 유형이든, 맞는 프로그램이 있어요.
             </h2>
           </div>
@@ -137,7 +137,7 @@ function TrustSystem() {
               <span className="ko">신뢰 시스템</span>
               <span className="en">/ Trust &amp; safety</span>
             </span>
-            <h2 style={{ marginTop:18, maxWidth:700 }}>
+            <h2 style={{ marginTop:18, maxWidth:700, whiteSpace:'nowrap' }}>
               검증된 시설만 — 안심하고 연결합니다.
             </h2>
           </div>

@@ -274,7 +274,7 @@ function Neighborhoods({ dense, searchFilters, onDetail }) {
             ? <>{userLocation.displayLabel}의 특수체육 시설</>
             : '우리 동네 시설'}
         </h2>
-        <p style={{ marginTop:14, fontSize:17, color:'var(--ink-charcoal)', maxWidth:580, lineHeight:1.55 }}>
+        <p style={{ marginTop:14, fontSize:17, color:'var(--ink-charcoal)', maxWidth:580, lineHeight:1.55, whiteSpace:'nowrap' }}>
           {active === '내 근처' && gpsRadius
             ? `GPS 기준 반경 ${gpsRadius}km 내 시설을 거리순으로 보여드립니다. 결과가 적으면 자동으로 반경을 넓힙니다.`
             : '시·군·구 단위로 가까운 시설을 먼저 보여드려요. 결과가 적으면 자동으로 반경을 넓혀 검색합니다.'}
