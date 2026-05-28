@@ -68,21 +68,25 @@ ${facilityList}
   "advice": "추가 조언"
 }`;
 
-  try {
+  const requestBody = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.3, maxOutputTokens: 512 },
+  });
+
+  async function callGemini(attempt) {
     const geminiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 512,
-          },
-        }),
-      }
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: requestBody }
     );
+    if (geminiRes.status === 429 && attempt < 3) {
+      await new Promise(r => setTimeout(r, attempt * 1000));
+      return callGemini(attempt + 1);
+    }
+    return geminiRes;
+  }
+
+  try {
+    const geminiRes = await callGemini(1);
 
     if (!geminiRes.ok) {
       const errText = await geminiRes.text();
