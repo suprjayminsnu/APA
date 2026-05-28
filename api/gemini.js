@@ -86,8 +86,8 @@ ${facilityList}
 
     if (!geminiRes.ok) {
       const errText = await geminiRes.text();
-      console.error('[Gemini] API 오류:', errText);
-      return res.status(502).json({ error: 'Gemini API 호출 실패', detail: errText });
+      console.error('[Gemini] API 오류 (status ' + geminiRes.status + '):', errText);
+      return res.status(200).json({ error: 'Gemini API 호출 실패 (' + geminiRes.status + ')', detail: errText, parseError: true });
     }
 
     const geminiData = await geminiRes.json();
